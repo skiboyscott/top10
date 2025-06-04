@@ -358,7 +358,7 @@
     </div>
 
     <!-- Supabase SDK -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/supabase-js/2.38.5/index.umd.min.js"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
     <script>
 _KEY = 'YOUR_WEATHER_API_KEY_HERE';
@@ -366,7 +366,8 @@ _KEY = 'YOUR_WEATHER_API_KEY_HERE';
         // ========================================
         // SUPABASE SETUP
         // ========================================
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // ========================================
         // APP DATA
@@ -541,7 +542,7 @@ _KEY = 'YOUR_WEATHER_API_KEY_HERE';
         });
 
         async function submitVote(isTop10) {
-            if (!supabase) {
+            if (!supabaseClient) {
                 showFeedback('Database connection error. Please try again.', true);
                 return;
             }
@@ -570,7 +571,7 @@ _KEY = 'YOUR_WEATHER_API_KEY_HERE';
                     pressure: weatherData.pressure
                 };
 
-                const { data, error } = await supabase
+                const { data, error } = await supabaseClient
                     .from('votes')
                     .insert([voteData]);
 
@@ -597,7 +598,7 @@ _KEY = 'YOUR_WEATHER_API_KEY_HERE';
         }
 
         async function loadTodaysStats() {
-            if (!supabase) {
+            if (!supabaseClient) {
                 document.getElementById('yesCount').textContent = '0';
                 document.getElementById('noCount').textContent = '0';
                 document.getElementById('totalCount').textContent = '0';
@@ -607,7 +608,7 @@ _KEY = 'YOUR_WEATHER_API_KEY_HERE';
             try {
                 const today = new Date().toISOString().split('T')[0];
                 
-                const { data, error } = await supabase
+                const { data, error } = await supabaseClient
                     .from('votes')
                     .select('is_top10')
                     .eq('date', today);
