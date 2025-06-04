@@ -500,12 +500,46 @@
         let currentWeatherData = null;
         let weatherLoadTimeout = null;
         let isManualMode = false;
+        let hasVotedToday = false;
+        let userSessionId = null;
+
+        // Generate or retrieve user session ID
+        function getUserSessionId() {
+            let sessionId = localStorage.getItem('weatherapp_session_id');
+            const lastVoteDate = localStorage.getItem('weatherapp_last_vote_date');
+            const today = new Date().toISOString().split('T')[0];
+            
+            // Reset session if it's a new day
+            if (lastVoteDate !== today) {
+                sessionId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('weatherapp_session_id', sessionId);
+                localStorage.setItem('weatherapp_last_vote_date', today);
+                hasVotedToday = false;
+            } else {
+                // Check if user already voted today
+                hasVotedToday = localStorage.getItem('weatherapp_voted_today') === 'true';
+            }
+            
+            return sessionId;
+        }
 
         // Initialize app when DOM loads
-        document.addEventListener('DOMContentLoaded', function() {
+        function initializeApp() {
             console.log('🚀 App initializing...');
+            
+            // Set up user session
+            userSessionId = getUserSessionId();
+            console.log('👤 User session:', userSessionId);
+            console.log('🗳️ Has voted today:', hasVotedToday);
+            
+            // Update UI based on vote status
+            updateVoteButtonsState();
+            
             loadWeatherData();
             loadTodaysStats();
+            
+            // Set up midnight reset timer
+            setupMidnightReset();
             
             // Set 10-second timeout for weather loading
             weatherLoadTimeout = setTimeout(() => {
@@ -514,7 +548,63 @@
                     showManualInput();
                 }
             }, 10000);
-        });
+        }
+
+        // Set up automatic reset at midnight
+        function setupMidnightReset() {
+            const now = new Date();
+            const tomorrow = new Date(now);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(0, 0, 0, 0);
+            
+            const msUntilMidnight = tomorrow.getTime() - now.getTime();
+            
+            setTimeout(() => {
+                console.log('🕛 Midnight reset triggered');
+                // Reset vote status
+                hasVotedToday = false;
+                localStorage.setItem('weatherapp_voted_today', 'false');
+                localStorage.setItem('weatherapp_last_vote_date', new Date().toISOString().split('T')[0]);
+                
+                // Update UI
+                updateVoteButtonsState();
+                loadTodaysStats();
+                
+                // Set up next midnight reset
+                setupMidnightReset();
+            }, msUntilMidnight);
+            
+            console.log(`⏰ Next reset in ${Math.round(msUntilMidnight / 1000 / 60)} minutes`);
+        }
+
+        // Update vote buttons based on whether user has voted
+        function updateVoteButtonsState() {
+            const yesBtn = document.getElementById('yesBtn');
+            const noBtn = document.getElementById('noBtn');
+            const questionSection = document.querySelector('.question-section');
+            
+            if (hasVotedToday) {
+                yesBtn.disabled = true;
+                noBtn.disabled = true;
+                yesBtn.textContent = '✅ Voted Today';
+                noBtn.textContent = '✅ Voted Today';
+                
+                questionSection.innerHTML = `
+                    <h2>Thanks for voting today!</h2>
+                    <p>You can vote again tomorrow. Check back at midnight for a fresh vote!</p>
+                `;
+            } else {
+                yesBtn.disabled = false;
+                noBtn.disabled = false;
+                yesBtn.textContent = '👍 Yes!';
+                noBtn.textContent = '👎 Not quite';
+                
+                questionSection.innerHTML = `
+                    <h2>Is today a "Top 10" weather day?</h2>
+                    <p>Would you consider today's weather to be one of the 10 best days of the year in the Twin Cities?</p>
+                `;
+            }
+        }
 
         // Show manual input form
         function showManualInput() {
