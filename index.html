@@ -165,6 +165,12 @@
             transform: translateY(0);
         }
 
+        .vote-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .yes-btn {
             background: linear-gradient(135deg, #00b894, #00a085);
             color: white;
@@ -186,6 +192,11 @@
 
         .feedback.show {
             animation: slideIn 0.3s ease;
+        }
+
+        .feedback.error {
+            border-left-color: #e84393;
+            background: #fdf2f8;
         }
 
         @keyframes slideIn {
@@ -224,6 +235,25 @@
             font-style: italic;
         }
 
+        .config-section {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .config-section h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .config-section p {
+            color: #856404;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
         @media (max-width: 480px) {
             .container {
                 margin: 0;
@@ -240,6 +270,11 @@
 </head>
 <body>
     <div class="container">
+        <div class="config-section">
+            <h3>⚙️ Setup Required</h3>
+            <p>To store votes, please add your Supabase credentials in the JavaScript section below. Check the console for setup instructions.</p>
+        </div>
+
         <div class="header">
             <div class="logo">☀️</div>
             <h1>Top 10 Weather Day</h1>
@@ -256,10 +291,10 @@
         </div>
 
         <div class="vote-buttons">
-            <button class="vote-btn yes-btn" onclick="submitVote(true)">
+            <button class="vote-btn yes-btn" onclick="submitVote(true)" id="yesBtn">
                 👍 Yes, absolutely!
             </button>
-            <button class="vote-btn no-btn" onclick="submitVote(false)">
+            <button class="vote-btn no-btn" onclick="submitVote(false)" id="noBtn">
                 👎 Not quite
             </button>
         </div>
@@ -273,21 +308,82 @@
             <h3>📊 Today's Responses</h3>
             <div class="stat-item">
                 <span>Top 10 Day Votes:</span>
-                <span id="yesCount">0</span>
+                <span id="yesCount">Loading...</span>
             </div>
             <div class="stat-item">
                 <span>Not Top 10 Votes:</span>
-                <span id="noCount">0</span>
+                <span id="noCount">Loading...</span>
             </div>
             <div class="stat-item">
                 <span>Total Responses:</span>
-                <span id="totalCount">0</span>
+                <span id="totalCount">Loading...</span>
             </div>
         </div>
     </div>
 
+    <!-- Supabase SDK -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/supabase-js/2.38.5/index.umd.min.js"></script>
+
     <script>
-        // In-memory storage for demo purposes
+        // ========================================
+        // CONFIGURATION - REPLACE WITH YOUR VALUES
+        // ========================================
+        const SUPABASE_URL = 'https://qydykruzcngqaskudwsy.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF5ZHlrcnV6Y25ncWFza3Vkd3N5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkwMDA0NjcsImV4cCI6MjA2NDU3NjQ2N30.XsPo7tmgmszRYsWayAFr9IlA4JS8hd9Y9FEght2ktHk';
+        
+        // Weather API configuration (optional - using mock data for now)
+        const WEATHER_API_KEY = 'YOUR_WEATHER_API_KEY_HERE';
+
+        // ========================================
+        // SUPABASE SETUP
+        // ========================================
+        let supabase = null;
+        
+        if (SUPABASE_URL !== 'YOUR_SUPABASE_URL_HERE' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY_HERE') {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        } else {
+            console.log(`
+🔧 SETUP INSTRUCTIONS:
+
+1. Go to https://supabase.com and create a free account
+2. Create a new project
+3. Go to Settings > API and copy:
+   - Project URL
+   - anon public key
+4. Replace SUPABASE_URL and SUPABASE_ANON_KEY in this code
+5. In Supabase SQL Editor, run this query to create the votes table:
+
+CREATE TABLE votes (
+    id BIGSERIAL PRIMARY KEY,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    is_top10 BOOLEAN NOT NULL,
+    temperature NUMERIC,
+    conditions TEXT,
+    humidity NUMERIC,
+    wind_speed NUMERIC,
+    uv_index NUMERIC,
+    visibility NUMERIC,
+    location TEXT,
+    user_agent TEXT,
+    date DATE DEFAULT CURRENT_DATE
+);
+
+-- Enable Row Level Security
+ALTER TABLE votes ENABLE ROW LEVEL SECURITY;
+
+-- Policy to allow anyone to insert votes
+CREATE POLICY "Anyone can insert votes" ON votes
+    FOR INSERT WITH CHECK (true);
+
+-- Policy to allow anyone to read votes
+CREATE POLICY "Anyone can read votes" ON votes
+    FOR SELECT USING (true);
+            `);
+        }
+
+        // ========================================
+        // APP DATA
+        // ========================================
         let weatherData = {};
         let votingStats = {
             yes: 0,
@@ -295,7 +391,7 @@
             total: 0
         };
 
-        // Mock weather data - in production, this would come from a weather API
+        // Mock weather data - replace with real API
         const mockWeatherData = {
             location: "Minneapolis, MN",
             temperature: 72,
@@ -307,9 +403,12 @@
             timestamp: new Date().toISOString()
         };
 
+        // ========================================
+        // MAIN FUNCTIONS
+        // ========================================
         function initializeApp() {
             loadWeatherData();
-            updateStatsDisplay();
+            loadTodaysStats();
         }
 
         function loadWeatherData() {
@@ -347,64 +446,104 @@
             `;
         }
 
-        function submitVote(isTop10) {
-            // Create vote record
-            const voteData = {
-                timestamp: new Date().toISOString(),
-                isTop10: isTop10,
-                weatherConditions: weatherData,
-                userAgent: navigator.userAgent,
-                location: weatherData.location
-            };
-
-            // In a real app, this would be sent to your backend
-            console.log('Vote submitted:', voteData);
-
-            // Update local stats
-            if (isTop10) {
-                votingStats.yes++;
-            } else {
-                votingStats.no++;
+        async function submitVote(isTop10) {
+            if (!supabase) {
+                showFeedback('Please configure Supabase credentials first!', true);
+                return;
             }
-            votingStats.total++;
 
-            // Show feedback
-            showFeedback();
-            updateStatsDisplay();
+            // Disable buttons during submission
+            document.getElementById('yesBtn').disabled = true;
+            document.getElementById('noBtn').disabled = true;
 
-            // In production, you'd send this to your server:
-            // fetch('/api/votes', {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify(voteData)
-            // });
+            try {
+                const voteData = {
+                    is_top10: isTop10,
+                    temperature: weatherData.temperature,
+                    conditions: weatherData.conditions,
+                    humidity: weatherData.humidity,
+                    wind_speed: weatherData.windSpeed,
+                    uv_index: weatherData.uvIndex,
+                    visibility: weatherData.visibility,
+                    location: weatherData.location,
+                    user_agent: navigator.userAgent
+                };
+
+                const { data, error } = await supabase
+                    .from('votes')
+                    .insert([voteData]);
+
+                if (error) {
+                    throw error;
+                }
+
+                console.log('Vote saved successfully:', data);
+                showFeedback('Thank you for your vote! Your response has been recorded.', false);
+                
+                // Refresh stats
+                await loadTodaysStats();
+
+            } catch (error) {
+                console.error('Error saving vote:', error);
+                showFeedback('Sorry, there was an error saving your vote. Please try again.', true);
+            } finally {
+                // Re-enable buttons
+                document.getElementById('yesBtn').disabled = false;
+                document.getElementById('noBtn').disabled = false;
+            }
         }
 
-        function showFeedback() {
-            const feedback = document.getElementById('feedback');
-            feedback.style.display = 'block';
-            feedback.classList.add('show');
+        async function loadTodaysStats() {
+            if (!supabase) {
+                document.getElementById('yesCount').textContent = '0';
+                document.getElementById('noCount').textContent = '0';
+                document.getElementById('totalCount').textContent = '0';
+                return;
+            }
 
-            // Hide after 3 seconds
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                
+                const { data, error } = await supabase
+                    .from('votes')
+                    .select('is_top10')
+                    .eq('date', today);
+
+                if (error) {
+                    throw error;
+                }
+
+                const yesVotes = data.filter(vote => vote.is_top10).length;
+                const noVotes = data.filter(vote => !vote.is_top10).length;
+                const totalVotes = data.length;
+
+                document.getElementById('yesCount').textContent = yesVotes;
+                document.getElementById('noCount').textContent = noVotes;
+                document.getElementById('totalCount').textContent = totalVotes;
+
+            } catch (error) {
+                console.error('Error loading stats:', error);
+                document.getElementById('yesCount').textContent = 'Error';
+                document.getElementById('noCount').textContent = 'Error';
+                document.getElementById('totalCount').textContent = 'Error';
+            }
+        }
+
+        function showFeedback(message, isError = false) {
+            const feedback = document.getElementById('feedback');
+            feedback.innerHTML = `<h3>${isError ? 'Oops!' : 'Thank you!'}</h3><p>${message}</p>`;
+            feedback.className = `feedback show ${isError ? 'error' : ''}`;
+            feedback.style.display = 'block';
+
+            // Hide after 4 seconds
             setTimeout(() => {
                 feedback.style.display = 'none';
                 feedback.classList.remove('show');
-            }, 3000);
-        }
-
-        function updateStatsDisplay() {
-            document.getElementById('yesCount').textContent = votingStats.yes;
-            document.getElementById('noCount').textContent = votingStats.no;
-            document.getElementById('totalCount').textContent = votingStats.total;
+            }, 4000);
         }
 
         // Initialize the app when page loads
         document.addEventListener('DOMContentLoaded', initializeApp);
-
-        // Service Worker registration for PWA capabilities (optional)
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js').catch(console.error);
-        }
     </script>
 </body>
 </html>
