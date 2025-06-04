@@ -440,8 +440,11 @@ _KEY = 'YOUR_WEATHER_API_KEY_HERE';
         async function loadWeatherByLocation(location) {
             try {
                 console.log('Fetching weather for:', location);
+                console.log('Using WEATHER_BASE_URL:', WEATHER_BASE_URL);
+                console.log('Using WEATHER_API_KEY:', WEATHER_API_KEY ? 'Key present' : 'Key missing');
+                
                 const url = `${WEATHER_BASE_URL}/current.json?key=${WEATHER_API_KEY}&q=${encodeURIComponent(location)}&aqi=no`;
-                console.log('API URL:', url);
+                console.log('Full API URL:', url);
 
                 const response = await fetch(url);
                 console.log('Response status:', response.status);
@@ -449,7 +452,7 @@ _KEY = 'YOUR_WEATHER_API_KEY_HERE';
                 if (!response.ok) {
                     const errorText = await response.text();
                     console.error('API Error:', errorText);
-                    throw new Error(`Weather API error: ${response.status}`);
+                    throw new Error(`Weather API error: ${response.status} - ${errorText}`);
                 }
 
                 const data = await response.json();
