@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Top 10 Weather Day</title>
+    <title>Top 10 Weather Day - Minneapolis</title>
     <style>
         * {
             margin: 0;
@@ -188,6 +188,7 @@
             margin: 20px 0;
             text-align: center;
             border-left: 4px solid #00b894;
+            display: none;
         }
 
         .feedback.show {
@@ -235,8 +236,6 @@
             font-style: italic;
         }
 
-
-
         @media (max-width: 480px) {
             .container {
                 margin: 0;
@@ -253,8 +252,6 @@
 </head>
 <body>
     <div class="container">
-
-
         <div class="header">
             <div class="logo">☀️</div>
             <h1>Top 10 Weather Day</h1>
@@ -262,7 +259,7 @@
         </div>
 
         <div id="weatherCard" class="weather-card">
-            <div class="loading">Loading current weather...</div>
+            <div class="loading">Loading Minneapolis weather...</div>
         </div>
 
         <div class="question">
@@ -279,7 +276,7 @@
             </button>
         </div>
 
-        <div id="feedback" class="feedback" style="display: none;">
+        <div id="feedback" class="feedback">
             <h3>Thank you for your feedback!</h3>
             <p>Your response helps us better understand what makes a perfect weather day.</p>
         </div>
@@ -305,54 +302,70 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
     <script>
-_KEY = 'YOUR_WEATHER_API_KEY_HERE';
-
-        // ========================================
-        // SUPABASE SETUP
-        // ========================================
-        const { createClient } = supabase;
-        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        // ========================================
-        // APP DATA
-        // ========================================
-        let weatherData = {};
-        let votingStats = {
-            yes: 0,
-            no: 0,
-            total: 0
+        // Global configuration - declared at the very top
+        window.APP_CONFIG = {
+            SUPABASE_URL: 'https://qydykruzcngqaskudwsy.supabase.co',
+            SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InF5ZHlrcnV6Y25ncWFza3Vkd3N5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDkwMDA0NjcsImV4cCI6MjA2NDU3NjQ2N30.XsPo7tmgmszRYsWayAFr9IlA4JS8hd9Y9FEght2ktHk',
+            WEATHER_API_KEY: '80d6e7abc10f400ebc713153250406'
         };
-        let currentLocation = '';
 
-        // ========================================
-        // MAIN FUNCTIONS
-        // ========================================
-        function initializeApp() {
-            loadTodaysStats();
+        // Global variables
+        let supabaseClient = null;
+        let weatherData = {};
+
+        // Initialize Supabase when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Page loaded, initializing...');
+            
+            // Initialize Supabase
+            if (typeof supabase !== 'undefined') {
+                const { createClient } = supabase;
+                supabaseClient = createClient(window.APP_CONFIG.SUPABASE_URL, window.APP_CONFIG.SUPABASE_ANON_KEY);
+                console.log('Supabase initialized');
+            }
+            
+            // Load weather and stats
             loadMinneapolisWeather();
-        }
+            loadTodaysStats();
+        });
 
         async function loadMinneapolisWeather() {
             const weatherCard = document.getElementById('weatherCard');
-            weatherCard.innerHTML = '<div class="loading">Loading Minneapolis weather...</div>';
-
+            
             try {
-                // Direct fetch for Minneapolis weather
+                console.log('Loading Minneapolis weather...');
                 const response = await fetch(
-                    'https://api.weatherapi.com/v1/current.json?key=80d6e7abc10f400ebc713153250406&q=Minneapolis,MN&aqi=no'
+                    `https://api.weatherapi.com/v1/current.json?key=${window.APP_CONFIG.WEATHER_API_KEY}&q=Minneapolis,MN&aqi=no`
                 );
 
                 if (!response.ok) {
-                    throw new Error('Weather data not found');
+                    throw new Error(`Weather API error: ${response.status}`);
                 }
 
                 const data = await response.json();
-                processWeatherData(data);
+                console.log('Weather data received:', data);
+                
+                // Process weather data
+                const current = data.current;
+                const location = data.location;
+                
+                weatherData = {
+                    location: `${location.name}, ${location.region}`,
+                    temperature: Math.round(current.temp_f),
+                    conditions: current.condition.text,
+                    humidity: current.humidity,
+                    windSpeed: Math.round(current.wind_mph),
+                    uvIndex: current.uv,
+                    feelsLike: Math.round(current.feelslike_f),
+                    pressure: Math.round(current.pressure_in * 100) / 100,
+                    timestamp: new Date().toISOString()
+                };
+                
                 displayWeatherData();
 
             } catch (error) {
-                console.error('Error loading Minneapolis weather:', error);
-                // Fallback to mock data if API fails
+                console.error('Error loading weather:', error);
+                // Use fallback data
                 weatherData = {
                     location: "Minneapolis, MN",
                     temperature: 72,
@@ -360,33 +373,12 @@ _KEY = 'YOUR_WEATHER_API_KEY_HERE';
                     humidity: 45,
                     windSpeed: 8,
                     uvIndex: 6,
-                    visibility: 10,
                     feelsLike: 75,
                     pressure: 30.12,
                     timestamp: new Date().toISOString()
                 };
                 displayWeatherData();
             }
-        }
-
-        function processWeatherData(data) {
-            const current = data.current;
-            const location = data.location;
-            
-            weatherData = {
-                location: `${location.name}, ${location.region}`,
-                temperature: Math.round(current.temp_f),
-                conditions: current.condition.text,
-                humidity: current.humidity,
-                windSpeed: Math.round(current.wind_mph),
-                uvIndex: current.uv,
-                visibility: Math.round(current.vis_miles),
-                timestamp: new Date().toISOString(),
-                feelsLike: Math.round(current.feelslike_f),
-                pressure: Math.round(current.pressure_in)
-            };
-            
-            currentLocation = `${location.name}, ${location.region}`;
         }
 
         function displayWeatherData() {
@@ -416,20 +408,14 @@ _KEY = 'YOUR_WEATHER_API_KEY_HERE';
             `;
         }
 
-        // Allow Enter key to submit location - REMOVED since no location input
-        document.addEventListener('DOMContentLoaded', function() {
-            // Just initialize the app
-            console.log('DOM loaded, initializing app...');
-        });
-
         async function submitVote(isTop10) {
             if (!supabaseClient) {
-                showFeedback('Database connection error. Please try again.', true);
+                showFeedback('Database connection error. Please refresh and try again.', true);
                 return;
             }
 
             if (!weatherData.temperature) {
-                showFeedback('Please load weather data first!', true);
+                showFeedback('Please wait for weather data to load first!', true);
                 return;
             }
 
@@ -445,12 +431,13 @@ _KEY = 'YOUR_WEATHER_API_KEY_HERE';
                     humidity: weatherData.humidity,
                     wind_speed: weatherData.windSpeed,
                     uv_index: weatherData.uvIndex,
-                    visibility: weatherData.visibility,
                     location: weatherData.location,
                     user_agent: navigator.userAgent,
                     feels_like: weatherData.feelsLike,
                     pressure: weatherData.pressure
                 };
+
+                console.log('Submitting vote:', voteData);
 
                 const { data, error } = await supabaseClient
                     .from('votes')
@@ -460,7 +447,7 @@ _KEY = 'YOUR_WEATHER_API_KEY_HERE';
                     throw error;
                 }
 
-                console.log('Vote saved successfully:', data);
+                console.log('Vote saved successfully');
                 showFeedback('Thank you for your vote! Your response has been recorded.', false);
                 
                 // Refresh stats after a brief delay
@@ -470,7 +457,7 @@ _KEY = 'YOUR_WEATHER_API_KEY_HERE';
                 console.error('Error saving vote:', error);
                 showFeedback('Sorry, there was an error saving your vote. Please try again.', true);
             } finally {
-                // Re-enable buttons after 2 seconds to prevent double-voting
+                // Re-enable buttons after 2 seconds
                 setTimeout(() => {
                     document.getElementById('yesBtn').disabled = false;
                     document.getElementById('noBtn').disabled = false;
@@ -526,9 +513,6 @@ _KEY = 'YOUR_WEATHER_API_KEY_HERE';
                 feedback.classList.remove('show');
             }, 4000);
         }
-
-        // Initialize the app when page loads
-        document.addEventListener('DOMContentLoaded', initializeApp);
     </script>
 </body>
 </html>
