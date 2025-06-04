@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top 10 Weather Day</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .weather-card {
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+            border-radius: 16px;
+            padding: 25px;
+            margin: 25px 0;
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .weather-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 50%);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(180deg); }
+        }
+
+        .location {
+            font-size: 16px;
+            margin-bottom: 5px;
+            opacity: 0.9;
+        }
+
+        .temperature {
+            font-size: 48px;
+            font-weight: 300;
+            margin: 10px 0;
+        }
+
+        .conditions {
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+
+        .details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .detail-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .detail-label {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .question {
+            text-align: center;
+            margin: 30px 0 20px;
+        }
+
+        .question h2 {
+            color: #333;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .question p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .vote-buttons {
+            display: flex;
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .vote-btn {
+            flex: 1;
+            padding: 18px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .vote-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .vote-btn:active {
+            transform: translateY(0);
+        }
+
+        .yes-btn {
+            background: linear-gradient(135deg, #00b894, #00a085);
+            color: white;
+        }
+
+        .no-btn {
+            background: linear-gradient(135deg, #fd79a8, #e84393);
+            color: white;
+        }
+
+        .feedback {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            border-left: 4px solid #00b894;
+        }
+
+        .feedback.show {
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stats {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 25px;
+        }
+
+        .stats h3 {
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .stat-item:last-child {
+            border-bottom: none;
+        }
+
+        .loading {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                margin: 0;
+                padding: 20px;
+                border-radius: 0;
+                min-height: 100vh;
+            }
+            
+            .temperature {
+                font-size: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">☀️</div>
+            <h1>Top 10 Weather Day</h1>
+            <p class="subtitle">Help us identify the most beautiful days of the year</p>
+        </div>
+
+        <div id="weatherCard" class="weather-card">
+            <div class="loading">Loading current weather...</div>
+        </div>
+
+        <div class="question">
+            <h2>Is today a "Top 10" weather day?</h2>
+            <p>Would you consider today's weather to be one of the 10 best days of the year?</p>
+        </div>
+
+        <div class="vote-buttons">
+            <button class="vote-btn yes-btn" onclick="submitVote(true)">
+                👍 Yes, absolutely!
+            </button>
+            <button class="vote-btn no-btn" onclick="submitVote(false)">
+                👎 Not quite
+            </button>
+        </div>
+
+        <div id="feedback" class="feedback" style="display: none;">
+            <h3>Thank you for your feedback!</h3>
+            <p>Your response helps us better understand what makes a perfect weather day.</p>
+        </div>
+
+        <div class="stats">
+            <h3>📊 Today's Responses</h3>
+            <div class="stat-item">
+                <span>Top 10 Day Votes:</span>
+                <span id="yesCount">0</span>
+            </div>
+            <div class="stat-item">
+                <span>Not Top 10 Votes:</span>
+                <span id="noCount">0</span>
+            </div>
+            <div class="stat-item">
+                <span>Total Responses:</span>
+                <span id="totalCount">0</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // In-memory storage for demo purposes
+        let weatherData = {};
+        let votingStats = {
+            yes: 0,
+            no: 0,
+            total: 0
+        };
+
+        // Mock weather data - in production, this would come from a weather API
+        const mockWeatherData = {
+            location: "Minneapolis, MN",
+            temperature: 72,
+            conditions: "Partly Cloudy",
+            humidity: 45,
+            windSpeed: 8,
+            uvIndex: 6,
+            visibility: 10,
+            timestamp: new Date().toISOString()
+        };
+
+        function initializeApp() {
+            loadWeatherData();
+            updateStatsDisplay();
+        }
+
+        function loadWeatherData() {
+            // Simulate API call delay
+            setTimeout(() => {
+                weatherData = mockWeatherData;
+                displayWeatherData();
+            }, 1000);
+        }
+
+        function displayWeatherData() {
+            const weatherCard = document.getElementById('weatherCard');
+            weatherCard.innerHTML = `
+                <div class="location">${weatherData.location}</div>
+                <div class="temperature">${weatherData.temperature}°F</div>
+                <div class="conditions">${weatherData.conditions}</div>
+                <div class="details">
+                    <div class="detail-item">
+                        <div class="detail-label">Humidity</div>
+                        <div class="detail-value">${weatherData.humidity}%</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Wind</div>
+                        <div class="detail-value">${weatherData.windSpeed} mph</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">UV Index</div>
+                        <div class="detail-value">${weatherData.uvIndex}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Visibility</div>
+                        <div class="detail-value">${weatherData.visibility} mi</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function submitVote(isTop10) {
+            // Create vote record
+            const voteData = {
+                timestamp: new Date().toISOString(),
+                isTop10: isTop10,
+                weatherConditions: weatherData,
+                userAgent: navigator.userAgent,
+                location: weatherData.location
+            };
+
+            // In a real app, this would be sent to your backend
+            console.log('Vote submitted:', voteData);
+
+            // Update local stats
+            if (isTop10) {
+                votingStats.yes++;
+            } else {
+                votingStats.no++;
+            }
+            votingStats.total++;
+
+            // Show feedback
+            showFeedback();
+            updateStatsDisplay();
+
+            // In production, you'd send this to your server:
+            // fetch('/api/votes', {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify(voteData)
+            // });
+        }
+
+        function showFeedback() {
+            const feedback = document.getElementById('feedback');
+            feedback.style.display = 'block';
+            feedback.classList.add('show');
+
+            // Hide after 3 seconds
+            setTimeout(() => {
+                feedback.style.display = 'none';
+                feedback.classList.remove('show');
+            }, 3000);
+        }
+
+        function updateStatsDisplay() {
+            document.getElementById('yesCount').textContent = votingStats.yes;
+            document.getElementById('noCount').textContent = votingStats.no;
+            document.getElementById('totalCount').textContent = votingStats.total;
+        }
+
+        // Initialize the app when page loads
+        document.addEventListener('DOMContentLoaded', initializeApp);
+
+        // Service Worker registration for PWA capabilities (optional)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch(console.error);
+        }
+    </script>
+</body>
+</html>
