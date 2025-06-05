@@ -54,6 +54,114 @@
             font-weight: 500;
         }
 
+        .auth-section {
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(226, 232, 240, 0.5);
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
+            display: block;
+            color: #4a5568;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            background: white;
+            transition: border-color 0.2s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+        }
+
+        .auth-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 12px;
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(66, 153, 225, 0.3);
+        }
+
+        .auth-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .auth-toggle {
+            text-align: center;
+            color: #4a5568;
+            font-size: 14px;
+        }
+
+        .auth-toggle button {
+            background: none;
+            border: none;
+            color: #4299e1;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .user-welcome {
+            text-align: center;
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+        }
+
+        .user-welcome h3 {
+            margin-bottom: 4px;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+
         .weather-card {
             background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
             border-radius: 20px;
@@ -180,7 +288,7 @@
             letter-spacing: 0.5px;
         }
 
-        .vote-btn:hover {
+        .vote-btn:hover:not(:disabled) {
             transform: translateY(-3px);
             box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
         }
@@ -315,39 +423,18 @@
             margin-bottom: 16px;
         }
 
-        .input-group {
-            display: flex;
-            flex-direction: column;
-        }
-
         .input-group.full-width {
             grid-column: 1 / -1;
         }
 
-        .input-group label {
-            color: #4a5568;
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 4px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .input-group input,
         .input-group select {
+            width: 100%;
             padding: 10px 12px;
             border: 2px solid #e2e8f0;
             border-radius: 8px;
             font-size: 16px;
             background: white;
             transition: border-color 0.2s;
-        }
-
-        .input-group input:focus,
-        .input-group select:focus {
-            outline: none;
-            border-color: #4299e1;
-            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
         }
 
         .manual-submit-btn {
@@ -368,10 +455,8 @@
             box-shadow: 0 8px 20px rgba(66, 153, 225, 0.3);
         }
 
-        .manual-submit-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
+        .hidden {
+            display: none !important;
         }
 
         @media (max-width: 480px) {
@@ -400,84 +485,135 @@
             <p class="subtitle">Twin Cities weather crowdsourcing<br>Help us identify the most beautiful days!</p>
         </div>
 
-        <div id="weatherCard" class="weather-card">
-            <div class="weather-content">
-                <div class="loading">Loading Minneapolis weather...</div>
+        <!-- Authentication Section -->
+        <div id="authSection" class="auth-section">
+            <!-- Login Form -->
+            <div id="loginForm" class="auth-form active">
+                <h3 style="text-align: center; margin-bottom: 16px; color: #2d3748;">Welcome Back!</h3>
+                <div class="input-group">
+                    <label for="loginEmail">Email</label>
+                    <input type="email" id="loginEmail" placeholder="your@email.com" required>
+                </div>
+                <div class="input-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" placeholder="Your password" required>
+                </div>
+                <button class="auth-btn" onclick="handleLogin()" id="loginBtn">Sign In</button>
+                <div class="auth-toggle">
+                    Don't have an account? <button onclick="showSignup()">Create one here</button>
+                </div>
+            </div>
+
+            <!-- Signup Form -->
+            <div id="signupForm" class="auth-form">
+                <h3 style="text-align: center; margin-bottom: 16px; color: #2d3748;">Join the Community!</h3>
+                <div class="input-group">
+                    <label for="signupName">Name</label>
+                    <input type="text" id="signupName" placeholder="Your name" required>
+                </div>
+                <div class="input-group">
+                    <label for="signupEmail">Email</label>
+                    <input type="email" id="signupEmail" placeholder="your@email.com" required>
+                </div>
+                <div class="input-group">
+                    <label for="signupPassword">Password</label>
+                    <input type="password" id="signupPassword" placeholder="Choose a password" required>
+                </div>
+                <button class="auth-btn" onclick="handleSignup()" id="signupBtn">Create Account</button>
+                <div class="auth-toggle">
+                    Already have an account? <button onclick="showLogin()">Sign in here</button>
+                </div>
             </div>
         </div>
 
-        <div id="manualInput" class="manual-input">
-            <h3>⚡ Enter Current Weather Conditions</h3>
-            <div class="input-grid">
-                <div class="input-group">
-                    <label for="manualTemp">Temperature (°F)</label>
-                    <input type="number" id="manualTemp" placeholder="72" min="-50" max="120">
-                </div>
-                <div class="input-group">
-                    <label for="manualFeelsLike">Feels Like (°F)</label>
-                    <input type="number" id="manualFeelsLike" placeholder="75" min="-50" max="120">
-                </div>
-                <div class="input-group full-width">
-                    <label for="manualConditions">Weather Conditions</label>
-                    <select id="manualConditions">
-                        <option value="">Select conditions...</option>
-                        <option value="Sunny">Sunny</option>
-                        <option value="Partly Cloudy">Partly Cloudy</option>
-                        <option value="Cloudy">Cloudy</option>
-                        <option value="Light Rain">Light Rain</option>
-                        <option value="Rain">Rain</option>
-                        <option value="Thunderstorms">Thunderstorms</option>
-                        <option value="Snow">Snow</option>
-                        <option value="Fog">Fog</option>
-                        <option value="Windy">Windy</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label for="manualHumidity">Humidity (%)</label>
-                    <input type="number" id="manualHumidity" placeholder="55" min="0" max="100">
-                </div>
-                <div class="input-group">
-                    <label for="manualWind">Wind Speed (mph)</label>
-                    <input type="number" id="manualWind" placeholder="7" min="0" max="200">
+        <!-- User Welcome Section (hidden initially) -->
+        <div id="userWelcome" class="user-welcome hidden">
+            <h3>Welcome back, <span id="userName"></span>! 👋</h3>
+            <p id="userStatus">Ready to vote on today's weather?</p>
+            <button class="logout-btn" onclick="handleLogout()">Logout</button>
+        </div>
+
+        <!-- Main App Content (hidden until logged in) -->
+        <div id="mainContent" class="hidden">
+            <div id="weatherCard" class="weather-card">
+                <div class="weather-content">
+                    <div class="loading">Loading Minneapolis weather...</div>
                 </div>
             </div>
-            <button class="manual-submit-btn" onclick="submitManualWeather()" id="manualSubmitBtn">
-                Use This Weather Data
-            </button>
-        </div>
 
-        <div class="question-section">
-            <h2>Is today a "Top 10" weather day?</h2>
-            <p>Would you consider today's weather to be one of the 10 best days of the year in the Twin Cities?</p>
-        </div>
-
-        <div class="vote-buttons">
-            <button class="vote-btn yes-btn" onclick="submitVote(true)" id="yesBtn">
-                👍 Yes!
-            </button>
-            <button class="vote-btn no-btn" onclick="submitVote(false)" id="noBtn">
-                👎 Not quite
-            </button>
-        </div>
-
-        <div id="feedback" class="feedback">
-            <h3>Thank you!</h3>
-            <p>Your response helps us understand what makes a perfect weather day in the Twin Cities.</p>
-        </div>
-
-        <div class="stats-section">
-            <h3 class="stats-header">📊 Today's Community Votes</h3>
-            <div class="stat-item">
-                <span class="stat-label">🌟 Top 10 Day Votes</span>
-                <span class="stat-value" id="yesCount">Loading...</span>
+            <div id="manualInput" class="manual-input">
+                <h3>⚡ Enter Current Weather Conditions</h3>
+                <div class="input-grid">
+                    <div class="input-group">
+                        <label for="manualTemp">Temperature (°F)</label>
+                        <input type="number" id="manualTemp" placeholder="72" min="-50" max="120">
+                    </div>
+                    <div class="input-group">
+                        <label for="manualFeelsLike">Feels Like (°F)</label>
+                        <input type="number" id="manualFeelsLike" placeholder="75" min="-50" max="120">
+                    </div>
+                    <div class="input-group full-width">
+                        <label for="manualConditions">Weather Conditions</label>
+                        <select id="manualConditions">
+                            <option value="">Select conditions...</option>
+                            <option value="Sunny">Sunny</option>
+                            <option value="Partly Cloudy">Partly Cloudy</option>
+                            <option value="Cloudy">Cloudy</option>
+                            <option value="Light Rain">Light Rain</option>
+                            <option value="Rain">Rain</option>
+                            <option value="Thunderstorms">Thunderstorms</option>
+                            <option value="Snow">Snow</option>
+                            <option value="Fog">Fog</option>
+                            <option value="Windy">Windy</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="manualHumidity">Humidity (%)</label>
+                        <input type="number" id="manualHumidity" placeholder="55" min="0" max="100">
+                    </div>
+                    <div class="input-group">
+                        <label for="manualWind">Wind Speed (mph)</label>
+                        <input type="number" id="manualWind" placeholder="7" min="0" max="200">
+                    </div>
+                </div>
+                <button class="manual-submit-btn" onclick="submitManualWeather()" id="manualSubmitBtn">
+                    Use This Weather Data
+                </button>
             </div>
-            <div class="stat-item">
-                <span class="stat-label">😐 Regular Day Votes</span>
-                <span class="stat-value" id="noCount">Loading...</span>
+
+            <div class="question-section">
+                <h2>Is today a "Top 10" weather day?</h2>
+                <p>Would you consider today's weather to be one of the 10 best days of the year in the Twin Cities?</p>
             </div>
-            <div class="stat-item">
-                <span class="stat-label">📈 Total Responses</span>
-                <span class="stat-value" id="totalCount">Loading...</span>
+
+            <div class="vote-buttons">
+                <button class="vote-btn yes-btn" onclick="submitVote(true)" id="yesBtn">
+                    👍 Yes!
+                </button>
+                <button class="vote-btn no-btn" onclick="submitVote(false)" id="noBtn">
+                    👎 Not quite
+                </button>
+            </div>
+
+            <div id="feedback" class="feedback">
+                <h3>Thank you!</h3>
+                <p>Your response helps us understand what makes a perfect weather day in the Twin Cities.</p>
+            </div>
+
+            <div class="stats-section">
+                <h3 class="stats-header">📊 Today's Community Votes</h3>
+                <div class="stat-item">
+                    <span class="stat-label">🌟 Top 10 Day Votes</span>
+                    <span class="stat-value" id="yesCount">Loading...</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">😐 Regular Day Votes</span>
+                    <span class="stat-value" id="noCount">Loading...</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">📈 Total Responses</span>
+                    <span class="stat-value" id="totalCount">Loading...</span>
+                </div>
             </div>
         </div>
     </div>
@@ -500,67 +636,246 @@
         let currentWeatherData = null;
         let weatherLoadTimeout = null;
         let isManualMode = false;
+        let currentUser = null;
+        let hasVotedToday = false;
 
         // Initialize app when DOM loads
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 App initializing...');
-            loadWeatherData();
-            loadTodaysStats();
-            
-            // Set 10-second timeout for weather loading
-            weatherLoadTimeout = setTimeout(() => {
-                if (!currentWeatherData) {
-                    console.log('⏰ Weather API timeout - switching to manual input');
-                    showManualInput();
-                }
-            }, 10000);
+            checkAuthState();
         });
 
-        // Show manual input form
-        function showManualInput() {
-            document.getElementById('weatherCard').innerHTML = `
-                <div class="weather-content">
-                    <div class="loading">⚡ Couldn't load weather data automatically.<br>Please enter current conditions below.</div>
-                </div>
-            `;
-            document.getElementById('manualInput').style.display = 'block';
-            isManualMode = true;
+        // Check if user is already logged in
+        async function checkAuthState() {
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (session) {
+                    currentUser = session.user;
+                    showMainApp();
+                    await checkIfVotedToday();
+                    loadWeatherData();
+                    loadTodaysStats();
+                    setupMidnightReset();
+                } else {
+                    showAuthSection();
+                }
+            } catch (error) {
+                console.error('❌ Error checking auth state:', error);
+                showAuthSection();
+            }
         }
 
-        // Submit manual weather data
-        function submitManualWeather() {
-            const temp = document.getElementById('manualTemp').value;
-            const feelsLike = document.getElementById('manualFeelsLike').value;
-            const conditions = document.getElementById('manualConditions').value;
-            const humidity = document.getElementById('manualHumidity').value;
-            const wind = document.getElementById('manualWind').value;
+        // Show authentication section
+        function showAuthSection() {
+            document.getElementById('authSection').classList.remove('hidden');
+            document.getElementById('userWelcome').classList.add('hidden');
+            document.getElementById('mainContent').classList.add('hidden');
+        }
 
-            // Validation
-            if (!temp || !conditions) {
-                alert('Please enter at least temperature and weather conditions');
+        // Show main app content
+        function showMainApp() {
+            document.getElementById('authSection').classList.add('hidden');
+            document.getElementById('userWelcome').classList.remove('hidden');
+            document.getElementById('mainContent').classList.remove('hidden');
+            
+            // Update user welcome
+            const userName = currentUser.user_metadata?.name || currentUser.email.split('@')[0];
+            document.getElementById('userName').textContent = userName;
+        }
+
+        // Show login form
+        function showLogin() {
+            document.getElementById('loginForm').classList.add('active');
+            document.getElementById('signupForm').classList.remove('active');
+        }
+
+        // Show signup form
+        function showSignup() {
+            document.getElementById('signupForm').classList.add('active');
+            document.getElementById('loginForm').classList.remove('active');
+        }
+
+        // Handle user login
+        async function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            const loginBtn = document.getElementById('loginBtn');
+
+            if (!email || !password) {
+                showFeedback('Please enter both email and password', true);
                 return;
             }
 
-            // Create weather data object
-            currentWeatherData = {
-                location: "Minneapolis, MN (Manual Entry)",
-                temperature: parseInt(temp),
-                conditions: conditions,
-                humidity: parseInt(humidity) || 50,
-                windSpeed: parseInt(wind) || 0,
-                uvIndex: 5, // Default
-                feelsLike: parseInt(feelsLike) || parseInt(temp),
-                pressure: 30.00, // Default
-                visibility: 10, // Default
-                timestamp: new Date().toISOString(),
-                isManualEntry: true
-            };
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Signing In...';
 
-            // Hide manual input and show weather data
-            document.getElementById('manualInput').style.display = 'none';
-            displayWeatherData();
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+                if (error) throw error;
+
+                currentUser = data.user;
+                console.log('✅ User logged in successfully');
+                showMainApp();
+                await checkIfVotedToday();
+                loadWeatherData();
+                loadTodaysStats();
+                setupMidnightReset();
+
+            } catch (error) {
+                console.error('❌ Login error:', error);
+                showFeedback(error.message, true);
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Sign In';
+            }
+        }
+
+        // Handle user signup
+        async function handleSignup() {
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+            const signupBtn = document.getElementById('signupBtn');
+
+            if (!name || !email || !password) {
+                showFeedback('Please fill in all fields', true);
+                return;
+            }
+
+            if (password.length < 6) {
+                showFeedback('Password must be at least 6 characters', true);
+                return;
+            }
+
+            signupBtn.disabled = true;
+            signupBtn.textContent = 'Creating Account...';
+
+            try {
+                const { data, error } = await supabaseClient.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        data: {
+                            name: name
+                        }
+                    }
+                });
+
+                if (error) throw error;
+
+                if (data.user && !data.session) {
+                    showFeedback('Please check your email to confirm your account!', false);
+                } else {
+                    currentUser = data.user;
+                    console.log('✅ User signed up successfully');
+                    showMainApp();
+                    await checkIfVotedToday();
+                    loadWeatherData();
+                    loadTodaysStats();
+                    setupMidnightReset();
+                }
+
+            } catch (error) {
+                console.error('❌ Signup error:', error);
+                showFeedback(error.message, true);
+            } finally {
+                signupBtn.disabled = false;
+                signupBtn.textContent = 'Create Account';
+            }
+        }
+
+        // Handle user logout
+        async function handleLogout() {
+            try {
+                await supabaseClient.auth.signOut();
+                currentUser = null;
+                hasVotedToday = false;
+                showAuthSection();
+                console.log('✅ User logged out');
+            } catch (error) {
+                console.error('❌ Logout error:', error);
+            }
+        }
+
+        // Check if user has voted today
+        async function checkIfVotedToday() {
+            if (!currentUser) return;
+
+            try {
+                const today = new Date().toISOString().split('T')[0];
+                
+                const { data, error } = await supabaseClient
+                    .from('weather_votes')
+                    .select('id')
+                    .eq('user_id', currentUser.id)
+                    .eq('date', today);
+
+                if (error) throw error;
+
+                hasVotedToday = data.length > 0;
+                updateVoteButtonsState();
+
+            } catch (error) {
+                console.error('❌ Error checking vote status:', error);
+            }
+        }
+
+        // Update vote buttons based on whether user has voted
+        function updateVoteButtonsState() {
+            const yesBtn = document.getElementById('yesBtn');
+            const noBtn = document.getElementById('noBtn');
+            const questionSection = document.querySelector('.question-section');
+            const userStatus = document.getElementById('userStatus');
             
-            console.log('✅ Manual weather data submitted');
+            if (hasVotedToday) {
+                yesBtn.disabled = true;
+                noBtn.disabled = true;
+                yesBtn.textContent = '✅ Voted Today';
+                noBtn.textContent = '✅ Voted Today';
+                
+                questionSection.innerHTML = `
+                    <h2>Thanks for voting today!</h2>
+                    <p>You can vote again tomorrow. Check back at midnight for a fresh vote!</p>
+                `;
+                
+                userStatus.textContent = 'You\'ve already voted today! Come back tomorrow.';
+            } else {
+                yesBtn.disabled = false;
+                noBtn.disabled = false;
+                yesBtn.textContent = '👍 Yes!';
+                noBtn.textContent = '👎 Not quite';
+                
+                questionSection.innerHTML = `
+                    <h2>Is today a "Top 10" weather day?</h2>
+                    <p>Would you consider today's weather to be one of the 10 best days of the year in the Twin Cities?</p>
+                `;
+                
+                userStatus.textContent = 'Ready to vote on today\'s weather?';
+            }
+        }
+
+        // Set up automatic reset at midnight
+        function setupMidnightReset() {
+            const now = new Date();
+            const tomorrow = new Date(now);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(0, 0, 0, 0);
+            
+            const msUntilMidnight = tomorrow.getTime() - now.getTime();
+            
+            setTimeout(() => {
+                console.log('🕛 Midnight reset triggered');
+                hasVotedToday = false;
+                updateVoteButtonsState();
+                loadTodaysStats();
+                setupMidnightReset(); // Set up next midnight reset
+            }, msUntilMidnight);
+            
+            console.log(`⏰ Next reset in ${Math.round(msUntilMidnight / 1000 / 60)} minutes`);
         }
 
         // Load Minneapolis weather data
@@ -602,9 +917,63 @@
 
             } catch (error) {
                 console.error('❌ Error loading weather:', error);
-                // Don't show fallback immediately - let the timeout handle it
-                // This gives the user a chance to see the manual input option
+                console.log('🔄 Weather API failed - will show manual input after timeout');
+                
+                // Set 10-second timeout for manual input fallback
+                weatherLoadTimeout = setTimeout(() => {
+                    if (!currentWeatherData) {
+                        console.log('⏰ Weather API timeout - switching to manual input');
+                        showManualInput();
+                    }
+                }, 10000);
             }
+        }
+
+        // Show manual input form
+        function showManualInput() {
+            document.getElementById('weatherCard').innerHTML = `
+                <div class="weather-content">
+                    <div class="loading">⚡ Couldn't load weather data automatically.<br>Please enter current conditions below.</div>
+                </div>
+            `;
+            document.getElementById('manualInput').style.display = 'block';
+            isManualMode = true;
+        }
+
+        // Submit manual weather data
+        function submitManualWeather() {
+            const temp = document.getElementById('manualTemp').value;
+            const feelsLike = document.getElementById('manualFeelsLike').value;
+            const conditions = document.getElementById('manualConditions').value;
+            const humidity = document.getElementById('manualHumidity').value;
+            const wind = document.getElementById('manualWind').value;
+
+            // Validation
+            if (!temp || !conditions) {
+                showFeedback('Please enter at least temperature and weather conditions', true);
+                return;
+            }
+
+            // Create weather data object
+            currentWeatherData = {
+                location: "Minneapolis, MN (Manual Entry)",
+                temperature: parseInt(temp),
+                conditions: conditions,
+                humidity: parseInt(humidity) || 50,
+                windSpeed: parseInt(wind) || 0,
+                uvIndex: 5, // Default
+                feelsLike: parseInt(feelsLike) || parseInt(temp),
+                pressure: 30.00, // Default
+                visibility: 10, // Default
+                timestamp: new Date().toISOString(),
+                isManualEntry: true
+            };
+
+            // Hide manual input and show weather data
+            document.getElementById('manualInput').style.display = 'none';
+            displayWeatherData();
+            
+            console.log('✅ Manual weather data submitted');
         }
 
         // Display weather data in the UI
@@ -643,6 +1012,18 @@
 
         // Submit a vote
         async function submitVote(isTop10) {
+            // Check authentication
+            if (!currentUser) {
+                showFeedback('Please log in to vote!', true);
+                return;
+            }
+
+            // Check if user already voted today
+            if (hasVotedToday) {
+                showFeedback('You have already voted today! Come back tomorrow for a fresh vote.', true);
+                return;
+            }
+
             if (!currentWeatherData) {
                 showFeedback('Please wait for weather data to load!', true);
                 return;
@@ -655,9 +1036,11 @@
             noBtn.disabled = true;
 
             try {
-                console.log(`🗳️ Submitting vote: ${isTop10 ? 'YES' : 'NO'}`);
+                console.log(`🗳️ Submitting vote: ${isTop10 ? 'YES' : 'NO'} for user ${currentUser.id}`);
 
                 const voteData = {
+                    user_id: currentUser.id,
+                    user_email: currentUser.email,
                     is_top10: isTop10,
                     temperature: currentWeatherData.temperature,
                     conditions: currentWeatherData.conditions,
@@ -669,23 +1052,30 @@
                     visibility: currentWeatherData.visibility,
                     location: currentWeatherData.location,
                     user_agent: navigator.userAgent,
-                    vote_timestamp: new Date().toISOString(),
                     is_manual_entry: currentWeatherData.isManualEntry || false
                 };
+
+                console.log('📤 Vote data being sent:', voteData);
 
                 const { data, error } = await supabaseClient
                     .from('weather_votes')
                     .insert([voteData]);
 
                 if (error) {
+                    console.error('❌ Supabase error details:', error);
                     throw error;
                 }
 
-                console.log('✅ Vote submitted successfully');
+                console.log('✅ Vote submitted successfully', data);
+                
+                // Mark user as having voted today
+                hasVotedToday = true;
+                updateVoteButtonsState();
+                
                 showFeedback(
                     isTop10 
-                        ? 'Thanks! You think today is a Top 10 weather day! 🌟' 
-                        : 'Thanks! Every day helps us learn what makes perfect weather! 👍',
+                        ? 'Thanks! You think today is a Top 10 weather day! 🌟 Come back tomorrow to vote again!' 
+                        : 'Thanks! Every day helps us learn what makes perfect weather! 👍 Come back tomorrow to vote again!',
                     false
                 );
                 
@@ -693,21 +1083,38 @@
                 setTimeout(() => loadTodaysStats(), 500);
 
             } catch (error) {
-                console.error('❌ Error submitting vote:', error);
-                showFeedback('Sorry, there was an error submitting your vote. Please try again!', true);
-            } finally {
-                // Re-enable buttons after delay
-                setTimeout(() => {
-                    yesBtn.disabled = false;
-                    noBtn.disabled = false;
-                }, 3000);
+                console.error('❌ Full error object:', error);
+                console.error('❌ Error message:', error.message);
+                console.error('❌ Error details:', error.details);
+                console.error('❌ Error hint:', error.hint);
+                
+                let errorMessage = 'Sorry, there was an error submitting your vote.';
+                if (error.message) {
+                    errorMessage += ` Error: ${error.message}`;
+                }
+                
+                showFeedback(errorMessage, true);
+                
+                // Re-enable buttons on error
+                yesBtn.disabled = false;
+                noBtn.disabled = false;
             }
         }
 
         // Load today's voting statistics
         async function loadTodaysStats() {
+            if (!supabaseClient) {
+                console.error('❌ Supabase client not initialized');
+                document.getElementById('yesCount').textContent = 'Error';
+                document.getElementById('noCount').textContent = 'Error';
+                document.getElementById('totalCount').textContent = 'Error';
+                return;
+            }
+
             try {
+                console.log('📊 Loading today\'s stats...');
                 const today = new Date().toISOString().split('T')[0];
+                console.log('📅 Today\'s date:', today);
                 
                 const { data, error } = await supabaseClient
                     .from('weather_votes')
@@ -715,8 +1122,11 @@
                     .eq('date', today);
 
                 if (error) {
+                    console.error('❌ Supabase query error:', error);
                     throw error;
                 }
+
+                console.log('📊 Raw stats data:', data);
 
                 const yesVotes = data.filter(vote => vote.is_top10).length;
                 const noVotes = data.filter(vote => !vote.is_top10).length;
@@ -730,9 +1140,10 @@
 
             } catch (error) {
                 console.error('❌ Error loading stats:', error);
-                document.getElementById('yesCount').textContent = 'Error';
-                document.getElementById('noCount').textContent = 'Error';
-                document.getElementById('totalCount').textContent = 'Error';
+                console.error('❌ Error details:', error.message);
+                document.getElementById('yesCount').textContent = '0';
+                document.getElementById('noCount').textContent = '0';
+                document.getElementById('totalCount').textContent = '0';
             }
         }
 
@@ -753,9 +1164,27 @@
             }, 5000);
         }
 
+        // Listen for auth state changes
+        supabaseClient.auth.onAuthStateChange((event, session) => {
+            console.log('🔐 Auth state changed:', event);
+            if (event === 'SIGNED_IN') {
+                currentUser = session.user;
+                showMainApp();
+                checkIfVotedToday();
+                loadWeatherData();
+                loadTodaysStats();
+                setupMidnightReset();
+            } else if (event === 'SIGNED_OUT') {
+                currentUser = null;
+                hasVotedToday = false;
+                showAuthSection();
+            }
+        });
+
         // Log app info
         console.log('🌤️ Top 10 Weather Day - Twin Cities Edition');
         console.log('📱 Ready to collect community weather preferences!');
+        console.log('🔐 User authentication enabled');
     </script>
 </body>
 </html>
