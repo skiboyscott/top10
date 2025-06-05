@@ -530,6 +530,16 @@
         <div id="userWelcome" class="user-welcome hidden">
             <h3>Welcome back, <span id="userName"></span>! 👋</h3>
             <p id="userStatus">Ready to vote on today's weather?</p>
+            
+            <!-- Email Preferences -->
+            <div style="margin: 12px 0; padding: 12px; background: rgba(255,255,255,0.15); border-radius: 8px; border: 1px solid rgba(255,255,255,0.2);">
+                <label style="display: flex; align-items: center; font-size: 14px; cursor: pointer;">
+                    <input type="checkbox" id="emailReminders" style="margin-right: 8px; transform: scale(1.1);" onchange="updateEmailPreferences()">
+                    📧 Send me daily email reminders at 12 PM CST
+                </label>
+                <div id="emailStatus" style="font-size: 12px; margin-top: 4px; opacity: 0.8;"></div>
+            </div>
+            
             <button class="logout-btn" onclick="handleLogout()">Logout</button>
         </div>
 
@@ -681,6 +691,9 @@
             // Update user welcome
             const userName = currentUser.user_metadata?.name || currentUser.email.split('@')[0];
             document.getElementById('userName').textContent = userName;
+            
+            // Update email preferences checkbox
+            updateEmailPreferencesDisplay();
         }
 
         // Show login form
@@ -760,7 +773,8 @@
                     password: password,
                     options: {
                         data: {
-                            name: name
+                            name: name,
+                            email_reminders: false // Default to false, user can opt-in later
                         },
                         emailRedirectTo: window.location.origin
                     }
@@ -825,7 +839,104 @@
             }
         }
 
-        // Update vote buttons based on whether user has voted
+        // Update email preferences display
+        function updateEmailPreferencesDisplay() {
+            const checkbox = document.getElementById('emailReminders');
+            const status = document.getElementById('emailStatus');
+            
+            // Get current preference from user metadata
+            const emailReminders = currentUser?.user_metadata?.email_reminders || false;
+            checkbox.checked = emailReminders;
+            
+            if (emailReminders) {
+                status.textContent = '✅ Daily reminders enabled';
+                status.style.color = 'rgba(255,255,255,0.9)';
+            } else {
+                status.textContent = '📪 Daily reminders disabled';
+                status.style.color = 'rgba(255,255,255,0.7)';
+            }
+        }
+
+        // Update email preferences when user toggles checkbox
+        async function updateEmailPreferences() {
+            const checkbox = document.getElementById('emailReminders');
+            const status = document.getElementById('emailStatus');
+            
+            if (!currentUser) return;
+            
+            try {
+                status.textContent = '⏳ Updating preferences...';
+                
+                // Update user metadata with email preference
+                const { data, error } = await supabaseClient.auth.updateUser({
+                    data: {
+                        ...currentUser.user_metadata,
+                        email_reminders: checkbox.checked
+                    }
+                });
+                
+                if (error) throw error;
+                
+                // Update current user object
+                currentUser = data.user;
+                
+                // Also store in a separate table for easier querying by email service
+                await updateEmailPreferencesDatabase(checkbox.checked);
+                
+                // Update display
+                if (checkbox.checked) {
+                    status.textContent = '✅ Daily reminders enabled - you\'ll get emails at 12 PM CST';
+                    status.style.color = 'rgba(255,255,255,0.9)';
+                    showFeedback('Email reminders enabled! You\'ll get daily notifications at 12 PM CST.', false);
+                } else {
+                    status.textContent = '📪 Daily reminders disabled';
+                    status.style.color = 'rgba(255,255,255,0.7)';
+                    showFeedback('Email reminders disabled. You can re-enable them anytime.', false);
+                }
+                
+                console.log('✅ Email preferences updated successfully');
+                
+            } catch (error) {
+                console.error('❌ Error updating email preferences:', error);
+                
+                // Revert checkbox on error
+                checkbox.checked = !checkbox.checked;
+                status.textContent = '❌ Error updating preferences';
+                status.style.color = 'rgba(255,100,100,0.9)';
+                
+                showFeedback('Sorry, there was an error updating your email preferences. Please try again.', true);
+            }
+        }
+
+        // Store email preferences in database for easier email service access
+        async function updateEmailPreferencesDatabase(emailReminders) {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('email_preferences')
+                    .upsert({
+                        user_id: currentUser.id,
+                        user_email: currentUser.email,
+                        email_reminders: emailReminders,
+                        timezone: 'America/Chicago', // CST timezone
+                        reminder_time: '12:00:00', // 12 PM
+                        updated_at: new Date().toISOString()
+                    }, {
+                        onConflict: 'user_id'
+                    });
+                    
+                if (error) {
+                    console.warn('⚠️ Could not update email_preferences table (table may not exist yet):', error);
+                    // Don't throw error - this is optional for now
+                    return;
+                }
+                
+                console.log('✅ Email preferences stored in database');
+                
+            } catch (error) {
+                console.warn('⚠️ Email preferences database update failed:', error);
+                // Don't throw error - user metadata update is the primary storage
+            }
+        }
         function updateVoteButtonsState() {
             const yesBtn = document.getElementById('yesBtn');
             const noBtn = document.getElementById('noBtn');
