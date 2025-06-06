@@ -670,8 +670,12 @@
             
             // Set up event listeners
             document.getElementById('signupBtn').addEventListener('click', function() {
-                console.log('Signup button clicked!');
-                handleSignup();
+                console.log('🔧 Signup button clicked - about to call handleSignup');
+                try {
+                    handleSignup();
+                } catch (error) {
+                    console.error('🔧 Error in handleSignup:', error);
+                }
             });
             
             document.getElementById('loginBtn').addEventListener('click', handleLogin);
@@ -770,14 +774,15 @@
 
         // Handle user signup
         async function handleSignup() {
-            console.log('🔍 handleSignup function called!');
-            
-            const name = document.getElementById('signupName').value;
-            const email = document.getElementById('signupEmail').value;
-            const password = document.getElementById('signupPassword').value;
-            const signupBtn = document.getElementById('signupBtn');
+            try {
+                console.log('🔧 handleSignup function started');
+                
+                const name = document.getElementById('signupName').value;
+                const email = document.getElementById('signupEmail').value;
+                const password = document.getElementById('signupPassword').value;
+                const signupBtn = document.getElementById('signupBtn');
 
-            console.log('🔍 Form values:', { name, email, password: password ? '[hidden]' : 'empty' });
+                console.log('🔧 Form values retrieved:', { name, email, password: password ? '[hidden]' : 'empty' });
 
             if (!name || !email || !password) {
                 showFeedback('Please fill in all fields', true);
