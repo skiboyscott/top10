@@ -793,15 +793,28 @@
 
                 if (error) throw error;
 
-                // Always show email confirmation message for new signups
+                // Always show email confirmation screen for new signups
                 if (data.user) {
                     console.log('✅ User signed up, showing email confirmation');
+                    
+                    // Reset the signup button BEFORE showing confirmation screen
+                    signupBtn.disabled = false;
+                    signupBtn.textContent = 'Create Account';
+                    
+                    // Show the email confirmation screen
                     showEmailConfirmationMessage(email);
+                } else {
+                    // Fallback if no user object
+                    signupBtn.disabled = false;
+                    signupBtn.textContent = 'Create Account';
+                    showFeedback('Please check your email to confirm your account!', false);
                 }
 
             } catch (error) {
                 console.error('❌ Signup error:', error);
                 showFeedback(error.message, true);
+                
+                // Reset button on error
                 signupBtn.disabled = false;
                 signupBtn.textContent = 'Create Account';
             }
