@@ -54,6 +54,64 @@
             font-weight: 500;
         }
 
+        .email-confirmation {
+            background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+            color: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin: 20px 0;
+            text-align: center;
+            display: none;
+            box-shadow: 0 8px 20px rgba(66, 153, 225, 0.3);
+        }
+
+        .email-confirmation.show {
+            display: block;
+            animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .email-confirmation h3 {
+            margin-bottom: 12px;
+            font-size: 20px;
+        }
+
+        .email-confirmation p {
+            margin-bottom: 8px;
+            opacity: 0.95;
+        }
+
+        .email-confirmation .email-address {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            margin: 12px 0;
+            display: inline-block;
+        }
+
+        .confirmation-actions {
+            margin-top: 16px;
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .confirmation-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .confirmation-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
         .auth-section {
             background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
             border-radius: 16px;
@@ -487,6 +545,18 @@
 
         <!-- Authentication Section -->
         <div id="authSection" class="auth-section">
+            <!-- Email Confirmation Message -->
+            <div id="emailConfirmation" class="email-confirmation">
+                <h3>📧 Check Your Email!</h3>
+                <p>We've sent a confirmation link to:</p>
+                <div class="email-address" id="confirmationEmail"></div>
+                <p>Click the link in your email to activate your account and start voting!</p>
+                <div class="confirmation-actions">
+                    <button class="confirmation-btn" onclick="hideEmailConfirmation()">Got it!</button>
+                    <button class="confirmation-btn" onclick="resendConfirmationEmail()">Resend Email</button>
+                </div>
+            </div>
+
             <!-- Login Form -->
             <div id="loginForm" class="auth-form active">
                 <h3 style="text-align: center; margin-bottom: 16px; color: #2d3748;">Welcome Back!</h3>
@@ -768,28 +838,77 @@
 
                 if (error) throw error;
 
-                if (data.user && !data.session) {
-                    showFeedback('Please check your email to confirm your account!', false);
-                } else {
-                    currentUser = data.user;
-                    console.log('✅ User signed up successfully');
-                    showMainApp();
-                    await checkIfVotedToday();
-                    loadWeatherData();
-                    loadTodaysStats();
-                    setupMidnightReset();
+                // Always show email confirmation message for new signups
+                if (data.user) {
+                    console.log('✅ User signed up, showing email confirmation');
+                    showEmailConfirmationMessage(email);
                 }
 
             } catch (error) {
                 console.error('❌ Signup error:', error);
                 showFeedback(error.message, true);
-            } finally {
                 signupBtn.disabled = false;
                 signupBtn.textContent = 'Create Account';
             }
         }
 
-        // Handle user logout
+        // Show email confirmation message
+        function showEmailConfirmationMessage(email) {
+            const confirmationDiv = document.getElementById('emailConfirmation');
+            const emailSpan = document.getElementById('confirmationEmail');
+            const loginForm = document.getElementById('loginForm');
+            const signupForm = document.getElementById('signupForm');
+            
+            emailSpan.textContent = email;
+            
+            // Hide auth forms and show confirmation message
+            loginForm.style.display = 'none';
+            signupForm.style.display = 'none';
+            confirmationDiv.classList.add('show');
+            
+            // Reset signup button
+            const signupBtn = document.getElementById('signupBtn');
+            signupBtn.disabled = false;
+            signupBtn.textContent = 'Create Account';
+            
+            console.log(`📧 Showing email confirmation for: ${email}`);
+        }
+
+        // Hide email confirmation and show login form
+        function hideEmailConfirmation() {
+            const confirmationDiv = document.getElementById('emailConfirmation');
+            const loginForm = document.getElementById('loginForm');
+            
+            confirmationDiv.classList.remove('show');
+            confirmationDiv.style.display = 'none';
+            loginForm.style.display = 'block';
+            
+            showFeedback('Great! Once you confirm your email, you can sign in here.', false);
+        }
+
+        // Resend confirmation email
+        async function resendConfirmationEmail() {
+            const email = document.getElementById('confirmationEmail').textContent;
+            
+            try {
+                const { error } = await supabaseClient.auth.resend({
+                    type: 'signup',
+                    email: email,
+                    options: {
+                        emailRedirectTo: window.location.origin
+                    }
+                });
+
+                if (error) throw error;
+
+                showFeedback('Confirmation email sent again! Check your inbox.', false);
+                console.log(`📧 Resent confirmation email to: ${email}`);
+
+            } catch (error) {
+                console.error('❌ Error resending email:', error);
+                showFeedback('Sorry, there was an error resending the email. Please try again.', true);
+            }
+        }
         async function handleLogout() {
             try {
                 await supabaseClient.auth.signOut();
@@ -825,7 +944,104 @@
             }
         }
 
-        // Update vote buttons based on whether user has voted
+        // Update email preferences display
+        function updateEmailPreferencesDisplay() {
+            const checkbox = document.getElementById('emailReminders');
+            const status = document.getElementById('emailStatus');
+            
+            // Get current preference from user metadata
+            const emailReminders = currentUser?.user_metadata?.email_reminders || false;
+            checkbox.checked = emailReminders;
+            
+            if (emailReminders) {
+                status.textContent = '✅ Daily reminders enabled';
+                status.style.color = 'rgba(255,255,255,0.9)';
+            } else {
+                status.textContent = '📪 Daily reminders disabled';
+                status.style.color = 'rgba(255,255,255,0.7)';
+            }
+        }
+
+        // Update email preferences when user toggles checkbox
+        async function updateEmailPreferences() {
+            const checkbox = document.getElementById('emailReminders');
+            const status = document.getElementById('emailStatus');
+            
+            if (!currentUser) return;
+            
+            try {
+                status.textContent = '⏳ Updating preferences...';
+                
+                // Update user metadata with email preference
+                const { data, error } = await supabaseClient.auth.updateUser({
+                    data: {
+                        ...currentUser.user_metadata,
+                        email_reminders: checkbox.checked
+                    }
+                });
+                
+                if (error) throw error;
+                
+                // Update current user object
+                currentUser = data.user;
+                
+                // Also store in a separate table for easier querying by email service
+                await updateEmailPreferencesDatabase(checkbox.checked);
+                
+                // Update display
+                if (checkbox.checked) {
+                    status.textContent = '✅ Daily reminders enabled - you\'ll get emails at 12 PM CST';
+                    status.style.color = 'rgba(255,255,255,0.9)';
+                    showFeedback('Email reminders enabled! You\'ll get daily notifications at 12 PM CST.', false);
+                } else {
+                    status.textContent = '📪 Daily reminders disabled';
+                    status.style.color = 'rgba(255,255,255,0.7)';
+                    showFeedback('Email reminders disabled. You can re-enable them anytime.', false);
+                }
+                
+                console.log('✅ Email preferences updated successfully');
+                
+            } catch (error) {
+                console.error('❌ Error updating email preferences:', error);
+                
+                // Revert checkbox on error
+                checkbox.checked = !checkbox.checked;
+                status.textContent = '❌ Error updating preferences';
+                status.style.color = 'rgba(255,100,100,0.9)';
+                
+                showFeedback('Sorry, there was an error updating your email preferences. Please try again.', true);
+            }
+        }
+
+        // Store email preferences in database for easier email service access
+        async function updateEmailPreferencesDatabase(emailReminders) {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('email_preferences')
+                    .upsert({
+                        user_id: currentUser.id,
+                        user_email: currentUser.email,
+                        email_reminders: emailReminders,
+                        timezone: 'America/Chicago', // CST timezone
+                        reminder_time: '12:00:00', // 12 PM
+                        updated_at: new Date().toISOString()
+                    }, {
+                        onConflict: 'user_id'
+                    });
+                    
+                if (error) {
+                    console.warn('⚠️ Could not update email_preferences table (table may not exist yet):', error);
+                    // Don't throw error - this is optional for now
+                    return;
+                }
+                
+                console.log('✅ Email preferences stored in database');
+                
+            } catch (error) {
+                console.warn('⚠️ Email preferences database update failed:', error);
+                // Don't throw error - user metadata update is the primary storage
+            }
+        }
         function updateVoteButtonsState() {
             const yesBtn = document.getElementById('yesBtn');
             const noBtn = document.getElementById('noBtn');
