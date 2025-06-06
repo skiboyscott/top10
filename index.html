@@ -766,6 +766,8 @@
             const password = document.getElementById('signupPassword').value;
             const signupBtn = document.getElementById('signupBtn');
 
+            console.log('🔍 Starting signup process for:', email);
+
             if (!name || !email || !password) {
                 showFeedback('Please fill in all fields', true);
                 return;
@@ -780,6 +782,8 @@
             signupBtn.textContent = 'Creating Account...';
 
             try {
+                console.log('🔍 Calling Supabase signUp...');
+                
                 const { data, error } = await supabaseClient.auth.signUp({
                     email: email,
                     password: password,
@@ -791,28 +795,33 @@
                     }
                 });
 
-                if (error) throw error;
+                console.log('🔍 Supabase response:', { data, error });
+
+                if (error) {
+                    console.error('❌ Supabase error:', error);
+                    throw error;
+                }
+
+                // Reset the signup button BEFORE showing confirmation screen
+                signupBtn.disabled = false;
+                signupBtn.textContent = 'Create Account';
+                console.log('🔍 Button reset completed');
 
                 // Always show email confirmation screen for new signups
-                if (data.user) {
-                    console.log('✅ User signed up, showing email confirmation');
-                    
-                    // Reset the signup button BEFORE showing confirmation screen
-                    signupBtn.disabled = false;
-                    signupBtn.textContent = 'Create Account';
+                if (data && data.user) {
+                    console.log('✅ User data received, showing email confirmation');
+                    console.log('🔍 User object:', data.user);
                     
                     // Show the email confirmation screen
                     showEmailConfirmationMessage(email);
                 } else {
-                    // Fallback if no user object
-                    signupBtn.disabled = false;
-                    signupBtn.textContent = 'Create Account';
+                    console.log('⚠️ No user data, using fallback');
                     showFeedback('Please check your email to confirm your account!', false);
                 }
 
             } catch (error) {
                 console.error('❌ Signup error:', error);
-                showFeedback(error.message, true);
+                showFeedback(`Signup failed: ${error.message}`, true);
                 
                 // Reset button on error
                 signupBtn.disabled = false;
@@ -822,18 +831,35 @@
 
         // Show email confirmation screen (replaces auth forms)
         function showEmailConfirmationMessage(email) {
+            console.log('🔍 Starting showEmailConfirmationMessage with email:', email);
+            
             const authSection = document.getElementById('authSection');
             const emailConfirmationScreen = document.getElementById('emailConfirmationScreen');
             const emailDisplay = document.getElementById('confirmationEmailDisplay');
             
+            console.log('🔍 Elements found:', {
+                authSection: !!authSection,
+                emailConfirmationScreen: !!emailConfirmationScreen,
+                emailDisplay: !!emailDisplay
+            });
+            
+            if (!authSection || !emailConfirmationScreen || !emailDisplay) {
+                console.error('❌ Missing required elements for email confirmation');
+                showFeedback('Please check your email to confirm your account!', false);
+                return;
+            }
+            
             // Set the email in the display
             emailDisplay.textContent = email;
+            console.log('✅ Email set in display:', email);
             
             // Hide auth section and show confirmation screen
             authSection.classList.add('hidden');
             emailConfirmationScreen.classList.remove('hidden');
             
-            console.log(`📧 Showing email confirmation screen for: ${email}`);
+            console.log('✅ Switched to email confirmation screen');
+            console.log('🔍 Auth section hidden:', authSection.classList.contains('hidden'));
+            console.log('🔍 Email screen visible:', !emailConfirmationScreen.classList.contains('hidden'));
         }
 
         // Go back to login screen
