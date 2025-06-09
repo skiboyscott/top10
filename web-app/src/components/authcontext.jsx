@@ -87,7 +87,7 @@ export const AuthProvider = ({ children }) => {
 				is_manual_entry: weatherData.isManualEntry || false
 			};
 
-			const { data, error } = await supabase
+			const { error } = await supabase
 				.from('weather_votes')
 				.insert([voteData]);
 
@@ -95,7 +95,6 @@ export const AuthProvider = ({ children }) => {
 				throw new Error('❌ Supabase error details:', error.message);
 			}
 
-			console.log('✅ Vote submitted successfully', data);
 			setVotedToday(true);
 			loadTodaysStats()
 
@@ -118,14 +117,11 @@ export const AuthProvider = ({ children }) => {
 				throw error;
 			}
 
-			console.log('📊 Raw stats data:', data);
 			if (data) {
 
 				const yesVotes = data.filter(vote => vote.is_top10).length;
 				const noVotes = data.filter(vote => !vote.is_top10).length;
 				const totalVotes = data.length;
-				
-				console.log(`📊 Stats loaded: ${yesVotes} yes, ${noVotes} no, ${totalVotes} total`);
 				
 				setTodaysVotesData({yesVotes: yesVotes, noVotes: noVotes, totalVotes: totalVotes})
 			}
@@ -146,7 +142,6 @@ export const AuthProvider = ({ children }) => {
 			.select('id')
 			.eq('user_id', user.id)
 			.eq('date', today);
-			console.log(data)
 			
 			if (error) throw error;
 			
