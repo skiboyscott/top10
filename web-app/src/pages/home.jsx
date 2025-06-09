@@ -157,7 +157,7 @@ const WeatherCard = () => {
 
     return (
         <div style={style.weatherCard}>
-            {loading ? (
+            {loading && accessGranted ? (
                 <div style={style.weatherContent}>
                     <p style={style.loading}>Loading...</p>
                 </div>
