@@ -11,20 +11,21 @@ export const AuthProvider = ({ children }) => {
 	const [todaysVotesData, setTodaysVotesData] = useState({yesVotes: null, noVotes: null, totalVotes: null})
 
 	const signUp = async (email, password, name) => {
-		if (!email || !password || !name) {
-
+		if (email && password && name) {
 			const { data, error } = await supabase.auth.signUp({
 				email,
 				password,
 				options: {
-					data: { name },
-					emailRedirectTo: window.location.origin,
+				data: { name },
+				emailRedirectTo: window.location.origin,
 				},
 			});
 			
 			if (error) throw error;
-			return data;
-		}
+				return data;
+			} else {
+				throw new Error('Please provide email, password, and name');
+			}
 	};
 
 	const signIn = async (email, password) => {
