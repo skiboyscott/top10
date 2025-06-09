@@ -86,7 +86,7 @@ const UserWelcome = () => {
 };
 
 const WeatherCard = () => {
-    const {weatherData, location, fetchError, accessGranted} = useContext(WeatherContext)
+    const {weatherData, location, fetchError, accessGranted, loading} = useContext(WeatherContext)
 
     const style = {
         weatherCard: {
@@ -157,7 +157,11 @@ const WeatherCard = () => {
 
     return (
         <div style={style.weatherCard}>
-            {location && !fetchError && accessGranted ? (
+            {loading ? (
+                <div style={style.weatherContent}>
+                    <p style={style.loading}>Loading...</p>
+                </div>
+            ) : location && !fetchError && accessGranted ? (
                 <div style={style.weatherContent}>
                     <div style={style.location}>{weatherData.location}</div>
                     <div style={style.temperature}>{weatherData.temperature}°F</div>

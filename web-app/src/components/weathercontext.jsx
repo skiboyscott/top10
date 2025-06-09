@@ -8,12 +8,14 @@ export const WeatherProvider = ({ children }) => {
     const [location, setLocation] = useState('')
     const [fetchError, setFetchError] = useState(false)
     const [accessGranted, setAccessGranted] = useState(false)
+    const [loading, setLoading] = useState(false)
 
     const loadWeatherData = () => {
         navigator.geolocation.getCurrentPosition(
             async (position) => {
                 const { latitude, longitude } = position.coords;
                 setAccessGranted(true)
+                setLoading(true)
 
                 try {
                     const response = await fetch(
@@ -52,6 +54,12 @@ export const WeatherProvider = ({ children }) => {
     };
 
     useEffect(() => {
+        if (weatherData) {
+            setLoading(false)
+        }
+    }, [weatherData])
+
+    useEffect(() => {
         loadWeatherData()
     }, [])
 
@@ -61,7 +69,8 @@ export const WeatherProvider = ({ children }) => {
             weatherData,
             location,
             fetchError,
-            accessGranted
+            accessGranted,
+            loading
         }}
         >
         {children}
