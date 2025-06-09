@@ -503,25 +503,16 @@ const StatSection = () => {
     )
 };
 
-const MainContent = () => {
-
-    return(
-        <div>
-            <UserWelcome />
-            <WeatherCard />
-            <ManualInput />
-            <VotingSection />
-            <StatSection />
-        </div>
-    )
-};
-
 export const Home = () => {
 
     return(
         <div>
             <Header />
-            <MainContent />
+            <UserWelcome />
+            <WeatherCard />
+            <ManualInput />
+            <VotingSection />
+            <StatSection />
         </div>
     )
 }
