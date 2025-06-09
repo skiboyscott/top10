@@ -1,17 +1,17 @@
 import React, { createContext, useEffect, useState } from 'react';
-import supabase from './supabaseClient';
+import supabase from '../utils/supabaseClient';
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-	const [user, setUser] = useState(null)
+	const [userAccount, setUserAccount] = useState(null)
 	const [loggedIn, setLoggedIn] = useState(false);
 	const [userName, setUserName] = useState(null);
 	const [votedToday, setVotedToday] = useState(false);
 	const [todaysVotesData, setTodaysVotesData] = useState({yesVotes: null, noVotes: null, totalVotes: null})
 
 	const signUp = async (email, password, name) => {
-		if (email || password || name) {
+		if (!email || !password || !name) {
 
 			const { data, error } = await supabase.auth.signUp({
 				email,
@@ -43,7 +43,7 @@ export const AuthProvider = ({ children }) => {
 
             setLoggedIn(true);
             setUserName(data.user.user_metadata?.name || '');
-			setUser(data.user);
+			setUserAccount(data.user);
 
             // Optional: Store session in localStorage (Supabase already uses localStorage under the hood)
             // Optional: Load weather data, stats, etc. if needed here
@@ -56,12 +56,18 @@ export const AuthProvider = ({ children }) => {
     };
 
 	const signOut = async () => {
-		const { error } = await supabase.auth.signOut();
-		if (error) throw error;
-		setUserName(null);
-		setLoggedIn(false);
-		setVotedToday(false)
-		setUser(null)
+		try {
+			const { error } = await supabase.auth.signOut();
+				if (error) {
+				return;
+			}
+			setUserName(null);
+			setLoggedIn(false);
+			setVotedToday(false);
+			setUserAccount(null);
+		} catch (err) {
+			console.error('Exception during sign out:', err);
+		}
 	};
 	
     const submitVote = async (vote, weatherData) => {
@@ -71,8 +77,8 @@ export const AuthProvider = ({ children }) => {
 
 		try {
 			const voteData = {
-				user_id: user.id,
-				user_email: user.email,
+				user_id: userAccount.id,
+				user_email: userAccount.email,
 				is_top10: vote,
 				temperature: weatherData.temperature,
 				conditions: weatherData.conditions,
@@ -157,34 +163,48 @@ export const AuthProvider = ({ children }) => {
 
 	useEffect(() => {
 		const getSession = async () => {
-			const { data: { session } } = await supabase.auth.getSession();
-			if (session?.user) {
-				setUserName(session.user.user_metadata?.name || session.user.email);
-				setLoggedIn(true);
-				setUser(session.user)
-				await checkIfVotedToday(session.user);
+			try {
+				const { data: { session }, error } = await supabase.auth.getSession();
+		
+				if (error) {
+					console.error('Error fetching session:', error);
+				}
+				
+				if (session?.user) {
+					setUserName(session.user.user_metadata?.name || session.user.email);
+					setLoggedIn(true);
+					setUserAccount(session.user);
+					await checkIfVotedToday(session.user);
+				} else {
+					setUserName(null);
+					setLoggedIn(false);
+					setUserAccount(null);
+					setVotedToday(false);
+				}
+			} catch (err) {
+				console.error('Exception in getSession:', err);
 			}
 		};
 		
 		getSession();
 		
-		const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
+		const { data: listener } = supabase.auth.onAuthStateChange( (_event, session) => {
 			if (session?.user) {
-			setUserName(session.user.user_metadata?.name || session.user.email);
-			setLoggedIn(true);
-			setUser(session.user)
-			await checkIfVotedToday(session.user);
-		} else {
-			setUserName(null);
-			setLoggedIn(false);
-			setVotedToday(false);
-			setUser(null)
-		}
-		});
-
-		return () => {
-			listener.subscription.unsubscribe();
-		};
+				setUserName(session.user.user_metadata?.name || session.user.email);
+				setLoggedIn(true);
+				setUserAccount(session.user)
+				checkIfVotedToday(session.user);
+			} else {
+				setUserName(null);
+				setLoggedIn(false);
+				setVotedToday(false);
+				setUserAccount(null)
+			}
+	});
+	
+	return () => {
+		listener.subscription.unsubscribe();
+	};
 	}, []);
 
 	return (
