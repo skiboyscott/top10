@@ -72,12 +72,12 @@ export const AuthProvider = ({ children }) => {
 	};
 
 	const resetPassword = async (email) => {
-        const { error } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: 'https://top10weather.com/reset-password?queryParams=true',
-        });
-		return error
-    };
-	
+		const { error } = await supabase.auth.resetPasswordForEmail(email, {
+			redirectTo: 'https://top10weather.com/reset-password',
+		});
+		return error;
+	};
+
     const submitVote = async (vote, weatherData) => {
 		if (!weatherData) {
 			return;

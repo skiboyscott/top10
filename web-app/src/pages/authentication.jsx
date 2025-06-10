@@ -12,6 +12,7 @@ export const ResetPassword = () => {
     useEffect(() => {
         const handleSessionFromUrl = async () => {
             const { data, error } = await supabase.auth.getSessionFromUrl();
+            console.log("SESSION:", data, "ERROR:", error);
 
             if (error) {
                 setError('Invalid or expired link');
@@ -22,9 +23,6 @@ export const ResetPassword = () => {
                 setError('Session could not be established from URL.');
                 return;
             }
-
-            // Optional: store session if needed
-            console.log('Session:', data.session);
         };
 
         handleSessionFromUrl();
@@ -52,6 +50,10 @@ export const ResetPassword = () => {
     };
 
     const style = {
+        title: { textAlign: 'center',
+            marginBottom: '16px',
+            color: '#2d3748'
+        },
         inputGroup: {
             marginBottom: '16px',
         },
@@ -92,7 +94,7 @@ export const ResetPassword = () => {
 
     return (
         <div>
-            <h3 style={{ textAlign: 'center', marginBottom: '16px', color: '#2d3748' }}>
+            <h3 style={style.title}>
                 Choose a New Password
             </h3>
             <div style={style.inputGroup}>
@@ -134,6 +136,11 @@ const ForgotPassword = (props) => {
     };
 
     const style = {
+        title: {
+            textAlign: 'center',
+            marginBottom: '16px',
+            color: '#2d3748'
+        },
         inputGroup: {
             marginBottom: '16px',
         },
@@ -184,7 +191,7 @@ const ForgotPassword = (props) => {
 
     return (
         <div>
-            <h3 style={{ textAlign: 'center', marginBottom: '16px', color: '#2d3748' }}>
+            <h3 style={style.title}>
                 Forgot your password?
             </h3>
             <div style={style.inputGroup}>
