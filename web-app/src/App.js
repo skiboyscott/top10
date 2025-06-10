@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, HashRouter } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Home } from './pages/home';
 import { Authentication, ResetPassword } from './pages/authentication';
 import { AuthProvider } from './components/authcontext';
@@ -23,13 +23,13 @@ function App() {
       <AuthProvider>
         <WeatherProvider>
           <VoteProvider>
-            <HashRouter>
+            <BrowserRouter basename="/">
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/authentication" element={<Authentication />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
               </Routes>
-            </HashRouter>
+            </BrowserRouter>
           </VoteProvider>
         </WeatherProvider>
       </AuthProvider>

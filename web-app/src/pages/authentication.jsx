@@ -11,50 +11,16 @@ export const ResetPassword = () => {
 
     useEffect(() => {
         const processResetLink = async () => {
-            const fullHref = window.location.href;
-            const secondHashIndex = fullHref.indexOf('#access_token=');
-
-            if (secondHashIndex === -1) {
-            setError("Missing access token in reset link.");
+            const { data, error } = await supabase.auth.getSessionFromUrl();
+            if (error || !data?.session) {
+            setError("Failed to restore session");
             return;
             }
-
-            const tokenParams = new URLSearchParams(fullHref.substring(secondHashIndex + 1));
-            const access_token = tokenParams.get("access_token");
-            const refresh_token = tokenParams.get("refresh_token");
-            const expires_in = tokenParams.get("expires_in");
-            const token_type = tokenParams.get("token_type");
-
-            if (!access_token || !refresh_token) {
-            setError("Incomplete session parameters.");
-            return;
-            }
-
-            const session = {
-                access_token,
-                refresh_token,
-                expires_in: parseInt(expires_in),
-                token_type,
-                user: null, // Supabase will fetch this on its own
-            };
-
-            // Set the session manually
-            const { error } = await supabase.auth.setSession({
-                access_token,
-                refresh_token,
-            });
-
-            if (error) {
-                console.error("Failed to set session:", error);
-                setError("Unable to restore session.");
-            } else {
-                console.log("✅ Session manually restored.");
-            }
+            console.log("✅ Session restored", data.session);
         };
 
         processResetLink();
-}, []);
-
+    }, []);
 
     const handleReset = async () => {
         if (!password) {
