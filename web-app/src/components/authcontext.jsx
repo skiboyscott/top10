@@ -9,6 +9,7 @@ export const AuthProvider = ({ children }) => {
 	const [userName, setUserName] = useState(null);
 	const [votedToday, setVotedToday] = useState(false);
 	const [todaysVotesData, setTodaysVotesData] = useState({yesVotes: null, noVotes: null, totalVotes: null})
+	const [locationDate, setLocationDate] = useState('')
 
 	const signUp = async (email, password, name) => {
 		if (email && password && name) {
@@ -112,7 +113,7 @@ export const AuthProvider = ({ children }) => {
 
 	const loadTodaysStats = async () => {
 		try {
-			const today = new Date().toISOString().split('T')[0];
+			const today = locationDate
 			
 			const { data, error } = await supabase
 				.from('weather_votes')
@@ -159,8 +160,10 @@ export const AuthProvider = ({ children }) => {
 	};
 
 	useEffect(() => {
-		loadTodaysStats()
-	}, [])
+		if (locationDate) {
+			loadTodaysStats()
+		}
+	}, [locationDate])
 
 	useEffect(() => {
 		const getSession = async () => {
@@ -220,7 +223,8 @@ export const AuthProvider = ({ children }) => {
 				signUp,
 				signIn,
 				signOut,
-				submitVote
+				submitVote,
+				setLocationDate
 			}}
 		>
 			{children}

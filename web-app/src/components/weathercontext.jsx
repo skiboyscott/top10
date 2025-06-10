@@ -1,4 +1,7 @@
-import React, { createContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { AuthContext } from './authcontext';
+import tzLookup from 'tz-lookup';
+import { DateTime } from 'luxon';
 
 export const WeatherContext = createContext();
 const weatherApiKey = '80d6e7abc10f400ebc713153250406'
@@ -9,6 +12,7 @@ export const WeatherProvider = ({ children }) => {
     const [fetchError, setFetchError] = useState(false)
     const [accessGranted, setAccessGranted] = useState(false)
     const [loading, setLoading] = useState(false)
+    const {setLocationDate} = useContext(AuthContext)
 
     const loadWeatherData = () => {
         navigator.geolocation.getCurrentPosition(
@@ -52,6 +56,36 @@ export const WeatherProvider = ({ children }) => {
             }
         );
     };
+
+    useEffect(() => {
+        const fetchTimeForLocation = async () => {
+            if (!location) return;
+
+            try {
+                // Step 1: Get coordinates of the location
+                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}`);
+                const results = await response.json();
+
+                if (!results.length) {
+                    console.warn('No location results found');
+                    return;
+                }
+
+                const { lat, lon } = results[0];
+
+                // Step 2: Get the timezone
+                const timezone = tzLookup(lat, lon);
+
+                // Step 3: Get the current date in that timezone
+                const localDate = DateTime.now().setZone(timezone).toFormat('yyyy-MM-dd');
+                setLocationDate(localDate);
+            } catch (error) {
+                console.error('Error getting location time:', error);
+            }
+        };
+
+        fetchTimeForLocation();
+    }, [location]);
 
     useEffect(() => {
         if (weatherData) {
