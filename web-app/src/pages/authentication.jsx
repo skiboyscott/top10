@@ -11,38 +11,50 @@ export const ResetPassword = () => {
 
     useEffect(() => {
         const processResetLink = async () => {
-            const hash = window.location.hash;
-            const queryIndex = hash.indexOf('?');
-            if (queryIndex === -1) {
-                setError("Missing reset code in link.");
-                return;
+            const fullHref = window.location.href;
+            const secondHashIndex = fullHref.indexOf('#access_token=');
+
+            if (secondHashIndex === -1) {
+            setError("Missing access token in reset link.");
+            return;
             }
 
-            const queryString = hash.substring(queryIndex + 1);
-            const params = new URLSearchParams(queryString);
-            const code = params.get("code");
-            const type = params.get("type");
+            const tokenParams = new URLSearchParams(fullHref.substring(secondHashIndex + 1));
+            const access_token = tokenParams.get("access_token");
+            const refresh_token = tokenParams.get("refresh_token");
+            const expires_in = tokenParams.get("expires_in");
+            const token_type = tokenParams.get("token_type");
 
-            if (!code || type !== "recovery") {
-                setError("Invalid or expired reset link.");
-                return;
+            if (!access_token || !refresh_token) {
+            setError("Incomplete session parameters.");
+            return;
             }
 
-            const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+            const session = {
+                access_token,
+                refresh_token,
+                expires_in: parseInt(expires_in),
+                token_type,
+                user: null, // Supabase will fetch this on its own
+            };
+
+            // Set the session manually
+            const { error } = await supabase.auth.setSession({
+                access_token,
+                refresh_token,
+            });
 
             if (error) {
-                console.error("Token exchange error:", error);
-                setError("Token exchange failed.");
-            } else if (!data?.session) {
-                console.error("No session returned.");
-                setError("Session missing after token exchange.");
+                console.error("Failed to set session:", error);
+                setError("Unable to restore session.");
             } else {
-                console.log("✅ Session restored:", data.session);
+                console.log("✅ Session manually restored.");
             }
         };
 
         processResetLink();
-    }, []);
+}, []);
+
 
     const handleReset = async () => {
         if (!password) {
