@@ -10,12 +10,21 @@ export const ResetPassword = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const session = supabase.auth.getSession();
-        if (!session) {
-            setError('You must be logged in to reset your password');
-            // Optionally redirect:
-            // navigate('/authentication');
-        }
+        const checkSession = async () => {
+            const { data, error } = await supabase.auth.getSession();
+            
+            if (!data.session) {
+                setError('You must be logged in to reset your password');
+            } else {
+                console.log('Session loaded:', data.session);
+            }
+
+            if (error) {
+                console.error('Error getting session:', error);
+            }
+        };
+
+        checkSession();
     }, []);
 
     const handleReset = async () => {
