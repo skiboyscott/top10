@@ -10,40 +10,25 @@ export const ResetPassword = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const handlePasswordReset = async () => {
-            const hash = window.location.hash.substring(1); // Remove leading #
-            const params = new URLSearchParams(hash);
+        const processResetLink = async () => {
+        const { data, error } = await supabase.auth.getSessionFromUrl({
+            storeSession: true,
+            redirectTo: `${window.location.origin}/#/reset-password`
+        });
 
-            const access_token = params.get('access_token');
-            const refresh_token = params.get('refresh_token');
-
-            if (!access_token || !refresh_token) {
-                setError('Missing access or refresh token in URL.');
-                return;
-            }
-
-            const { data, error } = await supabase.auth.setSession({
-                access_token,
-                refresh_token
-            });
-
-            if (error) {
-                console.error('Session error:', error);
-                setError('Invalid or expired reset link.');
-                return;
-            }
-
-            if (!data.session) {
-                setError('Could not establish session from tokens.');
-                return;
-            }
-
-            console.log('Session restored from password reset link:', data.session);
-        };
-
-        handlePasswordReset();
+        if (error) {
+            console.error("Session error:", error);
+            setError("Invalid or expired reset link.");
+            return;
+        }
+        if (!data.session) {
+            setError("Unable to restore session.");
+            return;
+        }
+        console.log("✅ Session restored:", data.session);
+        }
+        processResetLink();
     }, []);
-
 
     const handleReset = async () => {
         if (!password) {
