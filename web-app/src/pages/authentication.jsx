@@ -1,16 +1,28 @@
-import { useContext, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import { AuthContext } from "../components/authcontext";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export const ResetPassword = () => {
-    const [searchParams] = useSearchParams();
-    const navigate = useNavigate();
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
-    const {confirmPasswordReset} = useContext(AuthContext)
+    const [accessToken, setAccessToken] = useState('');
+    const navigate = useNavigate();
+    const { confirmPasswordReset } = useContext(AuthContext);
 
-    const accessToken = searchParams.get('access_token');
+    useEffect(() => {
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const token = hashParams.get('access_token');
+        if (token) {
+            setAccessToken(token);
+        } else {
+            setError('Missing or invalid access token');
+        }
+
+        if (hashParams.get('error_description')) {
+            setError(decodeURIComponent(hashParams.get('error_description')));
+        }
+    }, []);
 
     const handleReset = async () => {
         if (!password) {
@@ -22,9 +34,8 @@ export const ResetPassword = () => {
             setError('Invalid or missing access token');
             return;
         }
-        console.log(accessToken)
 
-        const error = await confirmPasswordReset(password, accessToken);
+        const { error } = await confirmPasswordReset(password, accessToken);
 
         if (error) {
             setError(error.message);
