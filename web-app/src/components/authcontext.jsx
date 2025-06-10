@@ -77,11 +77,6 @@ export const AuthProvider = ({ children }) => {
         });
 		return error
     };
-
-	const confirmPasswordReset = async (password, accessToken) => {
-        const { error } = await supabase.auth.updateUser({ password }, { accessToken });
-		return error
-	}
 	
     const submitVote = async (vote, weatherData) => {
 		if (!weatherData) {
@@ -200,7 +195,6 @@ export const AuthProvider = ({ children }) => {
 				signIn,
 				signOut,
 				resetPassword,
-				confirmPasswordReset,
 				submitVote,
 				setLocationDate
 			}}

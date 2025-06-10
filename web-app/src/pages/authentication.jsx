@@ -1,27 +1,22 @@
 import { useContext, useEffect, useState } from "react"
 import { AuthContext } from "../components/authcontext";
 import { useNavigate } from "react-router-dom";
+import { supabase } from '../supabaseClient';
 
 export const ResetPassword = () => {
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
-    const [accessToken, setAccessToken] = useState('');
     const navigate = useNavigate();
-    const { confirmPasswordReset } = useContext(AuthContext);
 
     useEffect(() => {
-        const hashParams = new URLSearchParams(window.location.hash.substring(1));
-        const token = hashParams.get('access_token');
-        if (token) {
-            setAccessToken(token);
-        } else {
-            setError('Missing or invalid access token');
-        }
-
-        if (hashParams.get('error_description')) {
-            setError(decodeURIComponent(hashParams.get('error_description')));
-        }
+        const handleSessionFromUrl = async () => {
+            const { error } = await supabase.auth.getSessionFromUrl();
+            if (error) {
+                setError('Invalid or expired link');
+            }
+        };
+        handleSessionFromUrl();
     }, []);
 
     const handleReset = async () => {
@@ -30,12 +25,7 @@ export const ResetPassword = () => {
             return;
         }
 
-        if (!accessToken) {
-            setError('Invalid or missing access token');
-            return;
-        }
-
-        const { error } = await confirmPasswordReset(password, accessToken);
+        const { error } = await supabase.auth.updateUser({ password });
 
         if (error) {
             setError(error.message);
@@ -112,7 +102,7 @@ export const ResetPassword = () => {
             {error && <p style={style.error}>{error}</p>}
         </div>
     );
-}
+};
 
 const ForgotPassword = (props) => {
     const {toggleView} = props
