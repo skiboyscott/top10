@@ -14,7 +14,7 @@ export const ResetPassword = () => {
             // Convert the hash to a search string if it contains access_token
             if (window.location.hash.includes('access_token')) {
                 const hashParams = window.location.hash.substring(1); // remove the #
-                const newUrl = `${window.location.origin}/reset-password?${hashParams}`;
+                const newUrl = `${window.location.origin}/#/reset-password?${hashParams}`;
                 window.history.replaceState(null, '', newUrl);
             }
 
