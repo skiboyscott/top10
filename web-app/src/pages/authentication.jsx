@@ -103,7 +103,6 @@ export const ResetPassword = () => {
     );
 }
 
-
 const ForgotPassword = (props) => {
     const {toggleView} = props
     const [email, setEmail] = useState('');
