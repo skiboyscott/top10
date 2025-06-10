@@ -10,21 +10,37 @@ export const ResetPassword = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const checkSession = async () => {
-            const { data, error } = await supabase.auth.getSession();
-            
-            if (!data.session) {
-                setError('You must be logged in to reset your password');
-            } else {
-                console.log('Session loaded:', data.session);
+        const handlePasswordReset = async () => {
+            // Supabase sends token info in hash — convert it to query string
+            if (window.location.hash.includes('access_token')) {
+                const hashParams = window.location.hash.substring(1); // remove #
+                const newUrl = `${window.location.origin}/#/reset-password?${hashParams}`;
+                window.history.replaceState(null, '', newUrl);
             }
 
-            if (error) {
-                console.error('Error getting session:', error);
+            try {
+                // Must exchange URL token for session
+                const { data, error } = await supabase.auth.exchangeCodeForSession();
+
+                if (error) {
+                    console.error('Token exchange error:', error);
+                    setError('Invalid or expired reset link');
+                    return;
+                }
+
+                if (!data.session) {
+                    setError('Could not establish session');
+                    return;
+                }
+
+                console.log('Session loaded from URL:', data.session);
+            } catch (err) {
+                console.error('Unexpected error:', err);
+                setError('Something went wrong during session initialization.');
             }
         };
 
-        checkSession();
+        handlePasswordReset();
     }, []);
 
     const handleReset = async () => {
