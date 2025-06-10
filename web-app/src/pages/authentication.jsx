@@ -11,10 +11,11 @@ export const ResetPassword = () => {
 
     useEffect(() => {
         const handleSessionFromUrl = async () => {
-            const { data, error } = await supabase.auth.getSessionFromUrl();
-            console.log("SESSION:", data, "ERROR:", error);
+            const url = window.location.href.replace('#/reset-password?', '?');
+            const { data, error } = await supabase.auth.exchangeCodeForSession(url);
 
             if (error) {
+                console.error(error);
                 setError('Invalid or expired link');
                 return;
             }
@@ -23,6 +24,8 @@ export const ResetPassword = () => {
                 setError('Session could not be established from URL.');
                 return;
             }
+
+            console.log('Session:', data.session);
         };
 
         handleSessionFromUrl();
