@@ -60,6 +60,10 @@ export const AuthProvider = ({ children }) => {
 		try {
 			const { error } = await supabase.auth.signOut();
 				if (error) {
+					setUserName(null);
+					setLoggedIn(false);
+					setVotedToday(false);
+					setUserAccount(null);
 				return;
 			}
 			setUserName(null);
