@@ -11,12 +11,34 @@ export const ResetPassword = () => {
 
     useEffect(() => {
         const processResetLink = async () => {
-            const { data, error } = await supabase.auth.getSessionFromUrl();
-            if (error || !data?.session) {
-            setError("Failed to restore session");
-            return;
+            const hash = window.location.hash;
+            const queryIndex = hash.indexOf('?');
+            if (queryIndex === -1) {
+                setError("Missing reset code in link.");
+                return;
             }
-            console.log("✅ Session restored", data.session);
+
+            const queryString = hash.substring(queryIndex + 1);
+            const params = new URLSearchParams(queryString);
+            const code = params.get("code");
+            const type = params.get("type");
+
+            if (!code || type !== "recovery") {
+                setError("Invalid or expired reset link.");
+                return;
+            }
+
+            const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+
+            if (error) {
+                console.error("Token exchange error:", error);
+                setError("Token exchange failed.");
+            } else if (!data?.session) {
+                console.error("No session returned.");
+                setError("Session missing after token exchange.");
+            } else {
+                console.log("✅ Session restored:", data.session);
+            }
         };
 
         processResetLink();
@@ -407,9 +429,9 @@ const SignIn = (props) => {
                 <input style={style.input} type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Your password" required />
             </div>
             <button style={style.authBtn} type="submit" onClick={handleSignIn}>Sign In</button>
-            <div style={style.authToggle}>
+            {/* <div style={style.authToggle}>
                 <button style={style.toggleButton} type="button" onClick={goToForgot}>Forgot Password?</button>
-            </div>
+            </div> */}
             <div style={style.authToggle}>Don't have an account? {' '}
                 <button style={style.toggleButton} type="button" onClick={toggleView}>Create one here</button>
             </div>
