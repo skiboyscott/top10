@@ -49,9 +49,10 @@ export const ResetPassword = () => {
             return;
         }
 
-        const { error } = await supabase.auth.updateUser({ password });
+        const { error } = await supabase.auth.updateUser({ password: password });
 
         if (error) {
+            console.log(error)
             setError(error.message);
             setMessage('');
         } else {
