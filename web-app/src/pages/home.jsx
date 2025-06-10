@@ -53,7 +53,7 @@ const UserWelcome = () => {
             color: "white",
             padding: "6px 12px",
             borderRadius: "6px",
-            fontSize: "12px",
+            fontSize: "14px",
             cursor: "pointer",
             marginTop: "8px",
         },
