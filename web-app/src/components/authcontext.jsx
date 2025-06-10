@@ -58,12 +58,8 @@ export const AuthProvider = ({ children }) => {
 
 	const signOut = async () => {
 		try {
-			const { error } = await supabase.auth.signOut();
+			const { error } = await supabase.auth.signOut({ scope: 'local' });
 				if (error) {
-					setUserName(null);
-					setLoggedIn(false);
-					setVotedToday(false);
-					setUserAccount(null);
 				return;
 			}
 			setUserName(null);
