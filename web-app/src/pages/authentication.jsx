@@ -1,38 +1,205 @@
 import { useContext, useState } from "react"
 import { AuthContext } from "../components/authcontext";
-import { useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
+
+export const ResetPassword = () => {
+    const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
+    const [password, setPassword] = useState('');
+    const [message, setMessage] = useState('');
+    const [error, setError] = useState('');
+    const {confirmPasswordReset} = useContext(AuthContext)
+
+    const accessToken = searchParams.get('access_token');
+
+    const handleReset = async () => {
+        if (!password) {
+            setError('Please enter a new password');
+            return;
+        }
+
+        if (!accessToken) {
+            setError('Invalid or missing access token');
+            return;
+        }
+        console.log(accessToken)
+
+        const error = await confirmPasswordReset(password, accessToken);
+
+        if (error) {
+            setError(error.message);
+            setMessage('');
+        } else {
+            setMessage('Password successfully updated! You can now sign in.');
+            setError('');
+            setPassword('');
+            setTimeout(() => {
+                navigate('/authentication');
+            }, 3000);
+        }
+    };
+
+    const style = {
+        inputGroup: {
+            marginBottom: '16px',
+        },
+        label: {
+            display: 'block',
+            color: '#4a5568',
+            fontSize: '14px',
+            fontWeight: 600,
+            marginBottom: '6px',
+        },
+        input: {
+            width: '100%',
+            padding: '12px 16px',
+            border: '2px solid #e2e8f0',
+            borderRadius: '10px',
+            fontSize: '16px',
+            background: 'white',
+        },
+        authBtn: {
+            width: '100%',
+            background: 'linear-gradient(135deg, #4299e1 0%, #3182ce 100%)',
+            color: 'white',
+            border: 'none',
+            padding: '14px',
+            borderRadius: '12px',
+            fontSize: '16px',
+            fontWeight: 600,
+            cursor: 'pointer',
+            marginBottom: '12px',
+        },
+        message: {
+            color: 'green',
+        },
+        error: {
+            color: 'red',
+        },
+    };
+
+    return (
+        <div>
+            <h3 style={{ textAlign: 'center', marginBottom: '16px', color: '#2d3748' }}>
+                Choose a New Password
+            </h3>
+            <div style={style.inputGroup}>
+                <label style={style.label}>New Password</label>
+                <input
+                    style={style.input}
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your new password"
+                    required
+                />
+            </div>
+            <button style={style.authBtn} onClick={handleReset}>
+                Update Password
+            </button>
+            {message && <p style={style.message}>{message}</p>}
+            {error && <p style={style.error}>{error}</p>}
+        </div>
+    );
+}
 
 
+const ForgotPassword = (props) => {
+    const {toggleView} = props
+    const [email, setEmail] = useState('');
+    const [message, setMessage] = useState('');
+    const [error, setError] = useState('');
+    const {resetPassword} = useContext(AuthContext)
 
-/* const EmailConfirmation = () => {
+    const handleReset = async () => {
+        const error  = await resetPassword(email)
+        if (error) {
+            setError(error.message);
+            setMessage('');
+        } else {
+            setMessage('Password reset email sent! Check your inbox.');
+            setError('');
+        }
+    };
 
-    return(
-        <div id="emailConfirmationScreen" class="auth-section hidden">
-            <div style="text-align: center;">
-                <div style="font-size: 64px; margin-bottom: 20px;">📧</div>
-                <h2 style="color: #2d3748; margin-bottom: 16px; font-size: 24px;">Check Your Email!</h2>
-                <p style="color: #4a5568; margin-bottom: 8px; font-size: 16px;">We've sent a confirmation link to:</p>
-                <div style="background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%); color: white; padding: 12px 20px; border-radius: 12px; font-weight: 600; margin: 16px 0; display: inline-block; font-size: 16px;" id="confirmationEmailDisplay"></div>
-                <p style="color: #4a5568; margin-bottom: 24px; line-height: 1.5;">Click the link in your email to activate your account and start voting on weather!</p>
-                
-                <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 24px;">
-                    <button class="auth-btn" onclick="backToLogin()" style="flex: 1; max-width: 200px; background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);">
-                        ✅ Got it!
-                    </button>
-                    <button class="auth-btn" onclick="resendConfirmationEmail()" style="flex: 1; max-width: 200px; background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);">
-                        📮 Resend Email
-                    </button>
-                </div>
-                
-                <p style="color: #718096; font-size: 14px; margin-top: 20px; line-height: 1.4;">
-                    Don't see the email? Check your spam folder or try resending.<br/>
-                    The confirmation link will expire in 24 hours.
-                </p>
+    const style = {
+        inputGroup: {
+            marginBottom: '16px',
+        },
+        label: {
+            display: 'block',
+            color: '#4a5568',
+            fontSize: '14px',
+            fontWeight: 600,
+            marginBottom: '6px',
+        },
+        input: {
+            width: '100%',
+            padding: '12px 16px',
+            border: '2px solid #e2e8f0',
+            borderRadius: '10px',
+            fontSize: '16px',
+            background: 'white',
+        },
+        authBtn: {
+            width: '100%',
+            background: 'linear-gradient(135deg, #4299e1 0%, #3182ce 100%)',
+            color: 'white',
+            border: 'none',
+            padding: '14px',
+            borderRadius: '12px',
+            fontSize: '16px',
+            fontWeight: 600,
+            cursor: 'pointer',
+            marginBottom: '12px',
+        },
+        toggleButton: {
+            background: 'none',
+            border: 'none',
+            color: '#4299e1',
+            fontWeight: 600,
+            cursor: 'pointer',
+            textDecoration: 'underline',
+            padding: 0,
+            fontSize: '14px',
+        },
+        message: {
+            color: 'green',
+        },
+        error: {
+            color: 'red',
+        },
+    };
+
+    return (
+        <div>
+            <h3 style={{ textAlign: 'center', marginBottom: '16px', color: '#2d3748' }}>
+                Forgot your password?
+            </h3>
+            <div style={style.inputGroup}>
+                <label style={style.label}>Email</label>
+                <input
+                    style={style.input}
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="your@email.com"
+                    required
+                />
+            </div>
+            <button style={style.authBtn} onClick={handleReset}>
+                Send Reset Email
+            </button>
+            {message && <p style={style.message}>{message}</p>}
+            {error && <p style={style.error}>{error}</p>}
+            <div style={{ textAlign: 'center' }}>
+                <button style={style.toggleButton} onClick={toggleView}>
+                    Back to Sign In
+                </button>
             </div>
         </div>
-
-    )
-} */
+    );
+};
 
 const SignUp = (props) => {
     const {toggleView} = props
@@ -50,6 +217,9 @@ const SignUp = (props) => {
                 alert("Signed up successfully! Check your email for a verification email to confirm sign up!");
             }
         } catch (error) {
+            setEmail('')
+            setName('')
+            setPassword('')
             alert(error.message);
         }
     };
@@ -136,7 +306,7 @@ const SignUp = (props) => {
 };
 
 const SignIn = (props) => {
-    const {toggleView} = props
+    const {toggleView, goToForgot} = props
     const { signIn } = useContext(AuthContext);
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -149,6 +319,8 @@ const SignIn = (props) => {
                 navigate('/')
             }
         } catch (error) {
+            setEmail('')
+            setPassword('')
             alert(error.message);
         }
     }
@@ -222,6 +394,9 @@ const SignIn = (props) => {
                 <input style={style.input} type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Your password" required />
             </div>
             <button style={style.authBtn} type="submit" onClick={handleSignIn}>Sign In</button>
+            <div style={style.authToggle}>
+                <button style={style.toggleButton} type="button" onClick={goToForgot}>Forgot Password?</button>
+            </div>
             <div style={style.authToggle}>Don't have an account? {' '}
                 <button style={style.toggleButton} type="button" onClick={toggleView}>Create one here</button>
             </div>
@@ -230,11 +405,7 @@ const SignIn = (props) => {
 };
 
 export const Authentication = () => {
-    const [toggleSignIn, setToggleSignIn] = useState(false)
-
-    const toggleView = () => {
-        setToggleSignIn(!toggleSignIn)
-    }
+    const [authView, setAuthView] = useState('signIn'); 
 
     const style = {
         authSection: {
@@ -247,11 +418,9 @@ export const Authentication = () => {
 
     return(
         <div style={style.authSection}>
-            {toggleSignIn ? 
-                <SignUp {...{toggleView}} />
-            :
-                <SignIn {...{toggleView}} />
-            }
+            {authView === 'signIn' && <SignIn toggleView={() => setAuthView('signUp')} goToForgot={() => setAuthView('forgot')} />}
+            {authView === 'signUp' && <SignUp toggleView={() => setAuthView('signIn')} />}
+            {authView === 'forgot' && <ForgotPassword toggleView={() => setAuthView('signIn')} />}
         </div>
         
     )

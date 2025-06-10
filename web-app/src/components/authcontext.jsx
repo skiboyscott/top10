@@ -70,6 +70,18 @@ export const AuthProvider = ({ children }) => {
 			console.error('Exception during sign out:', err);
 		}
 	};
+
+	const resetPassword = async (email) => {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/reset-password`, // This should be a route in your app
+        });
+		return error
+    };
+
+	const confirmPasswordReset = async (password, accessToken) => {
+        const { error } = await supabase.auth.updateUser({ password }, { accessToken });
+		return error
+	}
 	
     const submitVote = async (vote, weatherData) => {
 		if (!weatherData) {
@@ -187,6 +199,8 @@ export const AuthProvider = ({ children }) => {
 				signUp,
 				signIn,
 				signOut,
+				resetPassword,
+				confirmPasswordReset,
 				submitVote,
 				setLocationDate
 			}}

@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Home } from './pages/home';
-import { Authentication } from './pages/authentication';
+import { Authentication, ResetPassword } from './pages/authentication';
 import { AuthProvider } from './components/authcontext';
 import { WeatherProvider } from './components/weathercontext';
 import { VoteProvider } from './components/votecontext';
@@ -27,6 +27,7 @@ function App() {
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/authentication" element={<Authentication />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
               </Routes>
             </BrowserRouter>
           </VoteProvider>
