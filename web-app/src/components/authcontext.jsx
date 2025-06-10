@@ -92,7 +92,8 @@ export const AuthProvider = ({ children }) => {
 				visibility: weatherData.visibility,
 				location: weatherData.location,
 				user_agent: navigator.userAgent,
-				is_manual_entry: weatherData.isManualEntry || false
+				is_manual_entry: weatherData.isManualEntry || false,
+				date: locationDate
 			};
 
 			const { error } = await supabase
