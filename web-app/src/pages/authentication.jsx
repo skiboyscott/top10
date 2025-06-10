@@ -11,22 +11,39 @@ export const ResetPassword = () => {
 
     useEffect(() => {
         const processResetLink = async () => {
-        const { data, error } = await supabase.auth.getSessionFromUrl({
-            storeSession: true,
-            redirectTo: `${window.location.origin}/#/reset-password`
-        });
+            const hash = window.location.hash.substring(1); // Remove the "#"
+            const queryIndex = hash.indexOf("?");
+            if (queryIndex === -1) {
+                setError("Missing auth information in reset link.");
+                return;
+            }
 
-        if (error) {
-            console.error("Session error:", error);
-            setError("Invalid or expired reset link.");
-            return;
-        }
-        if (!data.session) {
-            setError("Unable to restore session.");
-            return;
-        }
-        console.log("✅ Session restored:", data.session);
-        }
+            const queryString = hash.substring(queryIndex + 1);
+            const params = new URLSearchParams(queryString);
+            const code = params.get("code");
+            const type = params.get("type");
+
+            if (!code || !type) {
+                console.error("Missing code or type in reset link.");
+                setError("Invalid or expired reset link.");
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+                if (error) {
+                    console.error("Token exchange error:", error);
+                    setError("Token exchange failed.");
+                    return;
+                }
+
+                console.log("✅ Session restored:", data.session);
+            } catch (err) {
+                console.error("Unexpected error during session exchange:", err);
+                setError("Unexpected error during session restoration.");
+            }
+        };
+
         processResetLink();
     }, []);
 
