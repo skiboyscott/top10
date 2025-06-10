@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react"
 import { AuthContext } from "../components/authcontext";
 import { useNavigate } from "react-router-dom";
-import {supabase} from "../utils/supabaseClient";
+import supabase from "../utils/supabaseClient";
 
 export const ResetPassword = () => {
     const [password, setPassword] = useState('');
