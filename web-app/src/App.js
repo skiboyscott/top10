@@ -3,6 +3,7 @@ import { Home } from './pages/home';
 import { Authentication } from './pages/authentication';
 import { AuthProvider } from './components/authcontext';
 import { WeatherProvider } from './components/weathercontext';
+import { VoteProvider } from './components/votecontext';
 
 
 function App() {
@@ -21,12 +22,14 @@ function App() {
     <div style={style}>
       <AuthProvider>
         <WeatherProvider>
-          <BrowserRouter basename="/">
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/authentication" element={<Authentication />} />
-            </Routes>
-          </BrowserRouter>
+          <VoteProvider>
+            <BrowserRouter basename="/">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/authentication" element={<Authentication />} />
+              </Routes>
+            </BrowserRouter>
+          </VoteProvider>
         </WeatherProvider>
       </AuthProvider>
     </div>

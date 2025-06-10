@@ -8,7 +8,6 @@ export const AuthProvider = ({ children }) => {
 	const [loggedIn, setLoggedIn] = useState(false);
 	const [userName, setUserName] = useState(null);
 	const [votedToday, setVotedToday] = useState(false);
-	const [todaysVotesData, setTodaysVotesData] = useState({yesVotes: null, noVotes: null, totalVotes: null})
 	const [locationDate, setLocationDate] = useState('')
 
 	const signUp = async (email, password, name) => {
@@ -105,41 +104,11 @@ export const AuthProvider = ({ children }) => {
 			}
 
 			setVotedToday(true);
-			loadTodaysStats()
 
 		} catch (error) {
 			console.error('❌ Vote submission error:', error);
 		}
-    } 
-
-	const loadTodaysStats = async () => {
-		try {
-			const today = locationDate
-			
-			const { data, error } = await supabase
-				.from('weather_votes')
-				.select('is_top10')
-				.eq('date', today);
-
-			if (error) {
-				console.error('❌ Supabase query error:', error);
-				throw error;
-			}
-
-			if (data) {
-
-				const yesVotes = data.filter(vote => vote.is_top10).length;
-				const noVotes = data.filter(vote => !vote.is_top10).length;
-				const totalVotes = data.length;
-				
-				setTodaysVotesData({yesVotes: yesVotes, noVotes: noVotes, totalVotes: totalVotes})
-			}
-
-		} catch (error) {
-			console.error('❌ Error loading stats:', error);
-			console.error('❌ Error details:', error.message);
-		}
-	}
+    }
 
 	const checkIfVotedToday = async (user) => {
 		if (!user) return;
@@ -159,12 +128,6 @@ export const AuthProvider = ({ children }) => {
 			console.error('❌ Error checking vote status:', error);
 		}
 	};
-
-	useEffect(() => {
-		if (locationDate) {
-			loadTodaysStats()
-		}
-	}, [locationDate])
 
 	useEffect(() => {
 		const getSession = async () => {
@@ -218,7 +181,7 @@ export const AuthProvider = ({ children }) => {
 				loggedIn,
 				userName,
 				votedToday,
-				todaysVotesData,
+				locationDate,
 				setUserName,
 				setVotedToday,
 				signUp,

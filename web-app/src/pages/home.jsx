@@ -2,6 +2,7 @@ import { useContext, useState } from "react";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../components/authcontext";
 import { WeatherContext } from "../components/weathercontext";
+import { VoteContext } from "../components/votecontext";
 
 const Header = () => {
     const {location} = useContext(WeatherContext)
@@ -191,7 +192,7 @@ const WeatherCard = () => {
                 </div>
             ) : !accessGranted ? (
                 <div style={style.weatherContent}>
-                    <p style={style.loading}>Please enable location access in your browser and reload the page.</p>
+                    <p style={style.loading}>Please enable location settings on your device and in your browser, then reload page.</p>
                 </div>
             ) : null}
         </div>
@@ -443,7 +444,8 @@ const VotingSection = () => {
 };
 
 const StatSection = () => {
-    const {todaysVotesData} = useContext(AuthContext)
+    const {todaysVotesData} = useContext(VoteContext)
+    const {location} = useContext(WeatherContext)
 
     const style = {
         statsSection: {
@@ -490,7 +492,7 @@ const StatSection = () => {
 
     return(
         <div style={style.statsSection}>
-            <h3 style={style.statsHeader}>📊 Today's Community Votes</h3>
+            <h3 style={style.statsHeader}>📊 Today's Community Votes for {location}</h3>
             <div style={style.statItem}>
                 <span style={style.statLabel}>🌟 Top 10 Day Votes</span>
                 <span style={style.statValue}>{todaysVotesData.yesVotes != null ? todaysVotesData.yesVotes : 0}</span>
@@ -508,15 +510,20 @@ const StatSection = () => {
 };
 
 export const Home = () => {
+    const {location} = useContext(WeatherContext)
 
     return(
         <div>
             <Header />
             <UserWelcome />
             <WeatherCard />
-            <ManualInput />
-            <VotingSection />
-            <StatSection />
+            {location && 
+                <div>
+                    <ManualInput />
+                    <VotingSection />
+                    <StatSection />
+                </div>
+            }
         </div>
     )
 }
