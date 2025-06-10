@@ -11,8 +11,14 @@ export const ResetPassword = () => {
 
     useEffect(() => {
         const handleSessionFromUrl = async () => {
-            const url = window.location.href.replace('#/reset-password?', '?');
-            const { data, error } = await supabase.auth.exchangeCodeForSession(url);
+            // Convert the hash to a search string if it contains access_token
+            if (window.location.hash.includes('access_token')) {
+                const hashParams = window.location.hash.substring(1); // remove the #
+                const newUrl = `${window.location.origin}/reset-password?${hashParams}`;
+                window.history.replaceState(null, '', newUrl);
+            }
+
+            const { data, error } = await supabase.auth.getSessionFromUrl({ storeSession: true });
 
             if (error) {
                 console.error(error);
