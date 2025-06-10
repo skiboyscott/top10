@@ -11,37 +11,39 @@ export const ResetPassword = () => {
 
     useEffect(() => {
         const handlePasswordReset = async () => {
-            // Supabase sends token info in hash — convert it to query string
-            if (window.location.hash.includes('access_token')) {
-                const hashParams = window.location.hash.substring(1); // remove #
-                const newUrl = `${window.location.origin}/#/reset-password?${hashParams}`;
-                window.history.replaceState(null, '', newUrl);
+            const hash = window.location.hash.substring(1); // Remove leading #
+            const params = new URLSearchParams(hash);
+
+            const access_token = params.get('access_token');
+            const refresh_token = params.get('refresh_token');
+
+            if (!access_token || !refresh_token) {
+                setError('Missing access or refresh token in URL.');
+                return;
             }
 
-            try {
-                // Must exchange URL token for session
-                const { data, error } = await supabase.auth.exchangeCodeForSession();
+            const { data, error } = await supabase.auth.setSession({
+                access_token,
+                refresh_token
+            });
 
-                if (error) {
-                    console.error('Token exchange error:', error);
-                    setError('Invalid or expired reset link');
-                    return;
-                }
-
-                if (!data.session) {
-                    setError('Could not establish session');
-                    return;
-                }
-
-                console.log('Session loaded from URL:', data.session);
-            } catch (err) {
-                console.error('Unexpected error:', err);
-                setError('Something went wrong during session initialization.');
+            if (error) {
+                console.error('Session error:', error);
+                setError('Invalid or expired reset link.');
+                return;
             }
+
+            if (!data.session) {
+                setError('Could not establish session from tokens.');
+                return;
+            }
+
+            console.log('Session restored from password reset link:', data.session);
         };
 
         handlePasswordReset();
     }, []);
+
 
     const handleReset = async () => {
         if (!password) {
