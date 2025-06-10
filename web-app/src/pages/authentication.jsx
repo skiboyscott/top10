@@ -11,10 +11,10 @@ export const ResetPassword = () => {
 
     useEffect(() => {
         const processResetLink = async () => {
-            const hash = window.location.hash.substring(1); // Remove the "#"
-            const queryIndex = hash.indexOf("?");
+            const hash = window.location.hash;
+            const queryIndex = hash.indexOf('?');
             if (queryIndex === -1) {
-                setError("Missing auth information in reset link.");
+                setError("Missing reset code in link.");
                 return;
             }
 
@@ -23,24 +23,21 @@ export const ResetPassword = () => {
             const code = params.get("code");
             const type = params.get("type");
 
-            if (!code || !type) {
-                console.error("Missing code or type in reset link.");
+            if (!code || type !== "recovery") {
                 setError("Invalid or expired reset link.");
                 return;
             }
 
-            try {
-                const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-                if (error) {
-                    console.error("Token exchange error:", error);
-                    setError("Token exchange failed.");
-                    return;
-                }
+            const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
+            if (error) {
+                console.error("Token exchange error:", error);
+                setError("Token exchange failed.");
+            } else if (!data?.session) {
+                console.error("No session returned.");
+                setError("Session missing after token exchange.");
+            } else {
                 console.log("✅ Session restored:", data.session);
-            } catch (err) {
-                console.error("Unexpected error during session exchange:", err);
-                setError("Unexpected error during session restoration.");
             }
         };
 
