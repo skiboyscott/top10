@@ -73,7 +73,7 @@ export const AuthProvider = ({ children }) => {
 
 	const resetPassword = async (email) => {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: 'https://top10weather.com/reset-password?type=reset',
+            redirectTo: 'https://top10weather.com/reset-password?queryParams=true',
         });
 		return error
     };
