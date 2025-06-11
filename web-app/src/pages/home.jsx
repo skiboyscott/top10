@@ -446,6 +446,7 @@ const VotingSection = () => {
 const StatSection = () => {
     const {todaysVotesData} = useContext(VoteContext)
     const {location} = useContext(WeatherContext)
+    const [city, state] = location.split(',').map(str => str.trim());
 
     const style = {
         statsSection: {
@@ -491,19 +492,36 @@ const StatSection = () => {
     };
 
     return(
-        <div style={style.statsSection}>
-            <h3 style={style.statsHeader}>📊 Today's Community Votes for {location}</h3>
-            <div style={style.statItem}>
-                <span style={style.statLabel}>🌟 Top 10 Day Votes</span>
-                <span style={style.statValue}>{todaysVotesData.yesVotes != null ? todaysVotesData.yesVotes : 0}</span>
+        <div>
+            <div style={style.statsSection}>
+                <h3 style={style.statsHeader}>📊 Today's Community Votes for {city}, {state}</h3>
+                <div style={style.statItem}>
+                    <span style={style.statLabel}>🌟 Top 10 Day Votes</span>
+                    <span style={style.statValue}>{todaysVotesData.yesVotesCity != null ? todaysVotesData.yesVotesCity : 0}</span>
+                </div>
+                <div style={style.statItem}>
+                    <span style={style.statLabel}>😐 Regular Day Votes</span>
+                    <span style={style.statValue}>{todaysVotesData.noVotesCity != null ? todaysVotesData.noVotesCity : 0}</span>
+                </div>
+                <div style={{ ...style.statItem, ...style.statItemLast }}>
+                    <span style={style.statLabel}>📈 Total Responses</span>
+                    <span style={style.statValue}>{todaysVotesData.totalVotesCity != null ? todaysVotesData.totalVotesCity : 0}</span>
+                </div>
             </div>
-            <div style={style.statItem}>
-                <span style={style.statLabel}>😐 Regular Day Votes</span>
-                <span style={style.statValue}>{todaysVotesData.noVotes != null ? todaysVotesData.noVotes : 0}</span>
-            </div>
-            <div style={{ ...style.statItem, ...style.statItemLast }}>
-                <span style={style.statLabel}>📈 Total Responses</span>
-                <span style={style.statValue}>{todaysVotesData.totalVotes != null ? todaysVotesData.totalVotes : 0}</span>
+            <div style={style.statsSection}>
+                <h3 style={style.statsHeader}>📊 Today's Community Votes for {state}</h3>
+                <div style={style.statItem}>
+                    <span style={style.statLabel}>🌟 Top 10 Day Votes</span>
+                    <span style={style.statValue}>{todaysVotesData.yesVotesState != null ? todaysVotesData.yesVotesState : 0}</span>
+                </div>
+                <div style={style.statItem}>
+                    <span style={style.statLabel}>😐 Regular Day Votes</span>
+                    <span style={style.statValue}>{todaysVotesData.noVotesState != null ? todaysVotesData.noVotesState : 0}</span>
+                </div>
+                <div style={{ ...style.statItem, ...style.statItemLast }}>
+                    <span style={style.statLabel}>📈 Total Responses</span>
+                    <span style={style.statValue}>{todaysVotesData.totalVotesState != null ? todaysVotesData.totalVotesState : 0}</span>
+                </div>
             </div>
         </div>
     )
