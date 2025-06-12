@@ -7,7 +7,7 @@ export const AuthProvider = ({ children }) => {
 	const [userAccount, setUserAccount] = useState(null)
 	const [loggedIn, setLoggedIn] = useState(false);
 	const [userName, setUserName] = useState(null);
-	const [votedToday, setVotedToday] = useState(false);
+	const [votedTodayData, setVotedTodayData] = useState({});
 	const [locationDate, setLocationDate] = useState('')
 
 	const signUp = async (email, password, name) => {
@@ -63,7 +63,7 @@ export const AuthProvider = ({ children }) => {
 			}
 			setUserName(null);
 			setLoggedIn(false);
-			setVotedToday(false);
+			setVotedTodayData({});
 			setUserAccount(null);
 		} catch (err) {
 			console.error('Exception during sign out:', err);
@@ -109,8 +109,7 @@ export const AuthProvider = ({ children }) => {
 				throw new Error('❌ Supabase error details:', error.message);
 			}
 
-			setVotedToday(true);
-
+			checkIfVotedToday(userAccount)
 		} catch (error) {
 			console.error('❌ Vote submission error:', error);
 		}
@@ -128,8 +127,6 @@ export const AuthProvider = ({ children }) => {
 				throw new Error('❌ Error deleting vote: ' + error.message);
 			}
 
-			// Optionally reset state so the app knows vote is deleted
-			setVotedToday(false);
 			return true
 
 		} catch (error) {
@@ -144,13 +141,15 @@ export const AuthProvider = ({ children }) => {
 			const today = locationDate;
 			const { data, error } = await supabase
 			.from('weather_votes')
-			.select('id')
+			.select('id, is_top10')
 			.eq('user_id', user.id)
 			.eq('date', today);
 			
 			if (error) throw error;
+			if (data.length > 0) {
+				setVotedTodayData(data[0]);
+			}
 			
-			setVotedToday(data.length > 0);
 		} catch (error) {
 			console.error('❌ Error checking vote status:', error);
 		}
@@ -174,7 +173,7 @@ export const AuthProvider = ({ children }) => {
 					setUserName(null);
 					setLoggedIn(false);
 					setUserAccount(null);
-					setVotedToday(false);
+					setVotedTodayData({});
 				}
 			} catch (err) {
 				console.error('Exception in getSession:', err);
@@ -194,7 +193,7 @@ export const AuthProvider = ({ children }) => {
 				} else {
 					setUserName(null);
 					setLoggedIn(false);
-					setVotedToday(false);
+					setVotedTodayData({});
 					setUserAccount(null)
 				}
 			});
@@ -210,10 +209,10 @@ export const AuthProvider = ({ children }) => {
 			value={{
 				loggedIn,
 				userName,
-				votedToday,
+				votedTodayData,
 				locationDate,
 				setUserName,
-				setVotedToday,
+				setVotedTodayData,
 				signUp,
 				signIn,
 				signOut,

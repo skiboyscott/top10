@@ -14,7 +14,7 @@ export const VoteProvider = ({ children }) => {
 		noVotesState: null,
 		totalVotesState: null
 	});
-	const { locationDate, votedToday } = useContext(AuthContext);
+	const { locationDate, votedTodayData } = useContext(AuthContext);
 	const { location } = useContext(WeatherContext);
 
 	const loadTodaysStats = async () => {
@@ -75,7 +75,7 @@ export const VoteProvider = ({ children }) => {
 		if (locationDate && location) {
 			loadTodaysStats();
 		}
-	}, [locationDate, votedToday, location]);
+	}, [locationDate, votedTodayData, location]);
 
 
 	return (

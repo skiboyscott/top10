@@ -319,7 +319,7 @@ const ManualInput = () => {
 };
 
 const VotingSection = () => {
-    const {loggedIn, votedToday, submitVote, changeVote} = useContext(AuthContext)
+    const {loggedIn, votedTodayData, submitVote, changeVote} = useContext(AuthContext)
     const {location, weatherData} = useContext(WeatherContext)
 
     const vote = (top10) => {
@@ -427,30 +427,33 @@ const VotingSection = () => {
                 <p>Would you consider today's weather to be one of the 10 best days of the year{location ? ` in ${location}` : ''}?</p>
             </div>
             {loggedIn ?
-                votedToday ?
+                votedTodayData.id ?
                     <div style={style.questionSection}>
                         <h1>Would you like to change your vote? Is today a top 10 weather day?</h1>
                         <div style={style.voteButtons}>
-                            <button
+                            {votedTodayData.is_top10 === false ? 
+                                <button
                                 style={{ ...style.voteBtn, ...style.yesBtn }}
                                 onClick={() => {
                                     if (window.confirm("Are you sure you want to change your vote?")) {
                                         switchVote(true);
                                     }
                                 }}
-                            >
-                                👍 Yes!
-                            </button>
-                            <button
+                                >
+                                    👍 Yes!
+                                </button>
+                            :
+                                <button
                                 style={{ ...style.voteBtn, ...style.noBtn }}
                                 onClick={() => {
                                     if (window.confirm("Are you sure you want to change your vote?")) {
                                         switchVote(false);
                                     }
                                 }}
-                            >
-                                👎 Not quite
-                            </button>
+                                >
+                                    👎 Not quite
+                                </button>
+                            }
                         </div>
                     </div>
                 :
