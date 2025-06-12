@@ -75,7 +75,7 @@ export const VoteProvider = ({ children }) => {
 		if (locationDate && location) {
 			loadTodaysStats();
 		}
-	}, [locationDate, votedToday]);
+	}, [locationDate, votedToday, location]);
 
 
 	return (

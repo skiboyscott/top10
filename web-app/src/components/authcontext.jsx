@@ -121,7 +121,7 @@ export const AuthProvider = ({ children }) => {
 		if (!user) return;
 
 		try {
-			const today = new Date().toISOString().split('T')[0]; // 'YYYY-MM-DD'
+			const today = locationDate;
 			const { data, error } = await supabase
 			.from('weather_votes')
 			.select('id')
