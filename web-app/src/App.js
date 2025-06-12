@@ -14,7 +14,6 @@ const WebsiteIssues = () => {
             color: "white",
             padding: "16px",
             borderRadius: "12px",
-            marginBottom: "24px",
         },
         text: {
             fontSize: '16px',
