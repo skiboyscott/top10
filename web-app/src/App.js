@@ -5,8 +5,31 @@ import { AuthProvider } from './components/authcontext';
 import { WeatherProvider } from './components/weathercontext';
 import { VoteProvider } from './components/votecontext';
 
+const WebsiteIssues = () => {
+
+    const style = {
+        container: {
+            textAlign: "center",
+            background: "linear-gradient(135deg, #48bb78 0%, #38a169 100%)",
+            color: "white",
+            padding: "16px",
+            borderRadius: "12px",
+            marginBottom: "24px",
+        },
+        text: {
+            fontSize: '16px',
+        }
+    }
+
+    return (
+        <div style={style.container}>
+            <p style={style.text}>We are currently experiencing technical issues receiving information from our backend. We hope to be fully operational soon.</p>
+        </div>
+    );
+}
 
 function App() {
+  const webIssues = true
 
   const style = {
         maxWidth: "420px",
@@ -24,6 +47,7 @@ function App() {
         <WeatherProvider>
           <VoteProvider>
             <HashRouter basename="/">
+              {webIssues && <WebsiteIssues />}
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/authentication" element={<Authentication />} />
