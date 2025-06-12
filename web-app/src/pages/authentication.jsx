@@ -255,7 +255,7 @@ const SignUp = (props) => {
             setEmail('')
             setName('')
             setPassword('')
-            alert(error.message);
+            alert('Error trying to sign up, please try again later.');
         }
     };
 
@@ -356,7 +356,7 @@ const SignIn = (props) => {
         } catch (error) {
             setEmail('')
             setPassword('')
-            alert(error.message);
+            alert('Failed to login please try again later');
         }
     }
 

@@ -52,7 +52,6 @@ export const AuthProvider = ({ children }) => {
 
         } catch (error) {
             console.error('❌ Login error:', error);
-            alert(error.message);
         }
     };
 
