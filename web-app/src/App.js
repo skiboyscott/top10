@@ -22,13 +22,13 @@ const WebsiteIssues = () => {
 
     return (
         <div style={style.container}>
-            <p style={style.text}>We are currently experiencing technical issues receiving information from our backend. We hope to be fully operational soon.</p>
+            <p style={style.text}>We are currently experiencing technical issues receiving information from our backend. We hope to be fully operational soon. We thank you for your patience.</p>
         </div>
     );
 }
 
 function App() {
-  const webIssues = true
+  const webIssues = false
 
   const style = {
         maxWidth: "420px",
