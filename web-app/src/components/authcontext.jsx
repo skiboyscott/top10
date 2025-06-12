@@ -116,6 +116,27 @@ export const AuthProvider = ({ children }) => {
 		}
     }
 
+	const changeVote = async () => {
+		try {
+			const { error } = await supabase
+				.from('weather_votes')
+				.delete()
+				.eq('user_id', userAccount.id)
+				.eq('date', locationDate)
+
+			if (error) {
+				throw new Error('❌ Error deleting vote: ' + error.message);
+			}
+
+			// Optionally reset state so the app knows vote is deleted
+			setVotedToday(false);
+			return true
+
+		} catch (error) {
+			console.error('❌ changeVote error:', error);
+		}
+	};
+
 	const checkIfVotedToday = async (user) => {
 		if (!user) return;
 
@@ -159,27 +180,30 @@ export const AuthProvider = ({ children }) => {
 				console.error('Exception in getSession:', err);
 			}
 		};
-		
-		getSession();
-		
-		const { data: listener } = supabase.auth.onAuthStateChange( (_event, session) => {
-			if (session?.user) {
-				setUserName(session.user.user_metadata?.name || session.user.email);
-				setLoggedIn(true);
-				setUserAccount(session.user)
-				checkIfVotedToday(session.user);
-			} else {
-				setUserName(null);
-				setLoggedIn(false);
-				setVotedToday(false);
-				setUserAccount(null)
-			}
-	});
-	
-	return () => {
-		listener.subscription.unsubscribe();
-	};
-	}, []);
+
+		if (locationDate) {
+
+			getSession();
+			
+			const { data: listener } = supabase.auth.onAuthStateChange( (_event, session) => {
+				if (session?.user) {
+					setUserName(session.user.user_metadata?.name || session.user.email);
+					setLoggedIn(true);
+					setUserAccount(session.user)
+					checkIfVotedToday(session.user);
+				} else {
+					setUserName(null);
+					setLoggedIn(false);
+					setVotedToday(false);
+					setUserAccount(null)
+				}
+			});
+			
+			return () => {
+				listener.subscription.unsubscribe();
+			};
+		}
+	}, [locationDate]);
 
 	return (
 		<AuthContext.Provider
@@ -195,6 +219,7 @@ export const AuthProvider = ({ children }) => {
 				signOut,
 				resetPassword,
 				submitVote,
+				changeVote,
 				setLocationDate
 			}}
 		>

@@ -319,11 +319,18 @@ const ManualInput = () => {
 };
 
 const VotingSection = () => {
-    const {loggedIn, votedToday, submitVote} = useContext(AuthContext)
+    const {loggedIn, votedToday, submitVote, changeVote} = useContext(AuthContext)
     const {location, weatherData} = useContext(WeatherContext)
 
     const vote = (top10) => {
         submitVote(top10, weatherData)
+    }
+
+    const switchVote = async (top10) => {
+        const change = await changeVote()
+        if (change) {
+            vote(top10)
+        }
     }
 
     const style = {
@@ -422,7 +429,29 @@ const VotingSection = () => {
             {loggedIn ?
                 votedToday ?
                     <div style={style.questionSection}>
-                        <h1>Thank you for voting today! Come back tomorrow to vote again!</h1>
+                        <h1>Would you like to change your vote? Is today a top 10 weather day?</h1>
+                        <div style={style.voteButtons}>
+                            <button
+                                style={{ ...style.voteBtn, ...style.yesBtn }}
+                                onClick={() => {
+                                    if (window.confirm("Are you sure you want to change your vote?")) {
+                                        switchVote(true);
+                                    }
+                                }}
+                            >
+                                👍 Yes!
+                            </button>
+                            <button
+                                style={{ ...style.voteBtn, ...style.noBtn }}
+                                onClick={() => {
+                                    if (window.confirm("Are you sure you want to change your vote?")) {
+                                        switchVote(false);
+                                    }
+                                }}
+                            >
+                                👎 Not quite
+                            </button>
+                        </div>
                     </div>
                 :
                     <div style={style.voteButtons}>
