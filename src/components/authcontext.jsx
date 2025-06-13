@@ -5,7 +5,6 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
 	const [userAccount, setUserAccount] = useState(null)
-	const [loggedIn, setLoggedIn] = useState(false);
 	const [userName, setUserName] = useState(null);
 	const [votedTodayData, setVotedTodayData] = useState({});
 	const [locationDate, setLocationDate] = useState('')
@@ -41,13 +40,9 @@ export const AuthProvider = ({ children }) => {
             });
 
             if (error) throw error;
-
-            setLoggedIn(true);
+            
             setUserName(data.user.user_metadata?.name || '');
 			setUserAccount(data.user);
-
-            // Optional: Store session in localStorage (Supabase already uses localStorage under the hood)
-            // Optional: Load weather data, stats, etc. if needed here
 			return data;
 
         } catch (error) {
@@ -62,7 +57,6 @@ export const AuthProvider = ({ children }) => {
 				return;
 			}
 			setUserName(null);
-			setLoggedIn(false);
 			setVotedTodayData({});
 			setUserAccount(null);
 		} catch (err) {
@@ -170,11 +164,11 @@ export const AuthProvider = ({ children }) => {
 				
 				if (session?.user) {
 					setUserName(session.user.user_metadata?.name || session.user.email);
-					setLoggedIn(true);
+					
 					setUserAccount(session.user);
 				} else {
 					setUserName(null);
-					setLoggedIn(false);
+					
 					setUserAccount(null);
 				}
 			} catch (err) {
@@ -189,11 +183,11 @@ export const AuthProvider = ({ children }) => {
 			const { data: listener } = supabase.auth.onAuthStateChange( (_event, session) => {
 				if (session?.user) {
 					setUserName(session.user.user_metadata?.name || session.user.email);
-					setLoggedIn(true);
+					
 					setUserAccount(session.user)
 				} else {
 					setUserName(null);
-					setLoggedIn(false);
+					
 					setUserAccount(null)
 				}
 			});
@@ -207,7 +201,6 @@ export const AuthProvider = ({ children }) => {
 	return (
 		<AuthContext.Provider
 			value={{
-				loggedIn,
 				userName,
 				votedTodayData,
 				locationDate,
