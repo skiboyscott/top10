@@ -426,7 +426,7 @@ const VotingSection = () => {
                 <h3>Is today a "Top 10" weather day?</h3>
                 <p>Would you consider today's weather to be one of the 10 best days of the year{location ? ` in ${location}` : ''}?</p>
             </div>
-            {loggedIn ?
+            {loggedIn && location ?
                 votedTodayData.id ?
                     <div style={style.questionSection}>
                         <h3>Would you like to change your vote? Is today a top 10 weather day?</h3>

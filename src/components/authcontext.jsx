@@ -173,7 +173,6 @@ export const AuthProvider = ({ children }) => {
 					setUserName(null);
 					setLoggedIn(false);
 					setUserAccount(null);
-					setVotedTodayData({});
 				}
 			} catch (err) {
 				console.error('Exception in getSession:', err);
@@ -193,7 +192,6 @@ export const AuthProvider = ({ children }) => {
 				} else {
 					setUserName(null);
 					setLoggedIn(false);
-					setVotedTodayData({});
 					setUserAccount(null)
 				}
 			});
