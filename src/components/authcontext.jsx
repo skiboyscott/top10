@@ -157,7 +157,7 @@ export const AuthProvider = ({ children }) => {
 
 	useEffect(() => {
 		checkIfVotedToday(userAccount)
-	}, [userAccount])
+	}, [userAccount, locationDate])
 
 	useEffect(() => {
 		const getSession = async () => {
