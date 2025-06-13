@@ -185,11 +185,9 @@ export const AuthProvider = ({ children }) => {
 			const { data: listener } = supabase.auth.onAuthStateChange( (_event, session) => {
 				if (session?.user) {
 					setUserName(session.user.user_metadata?.name || session.user.email);
-					
 					setUserAccount(session.user)
 				} else {
 					setUserName(null);
-					
 					setUserAccount(null)
 				}
 			});
