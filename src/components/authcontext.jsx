@@ -150,7 +150,9 @@ export const AuthProvider = ({ children }) => {
 	};
 
 	useEffect(() => {
-		checkIfVotedToday(userAccount)
+		if (userAccount && locationDate) {
+			checkIfVotedToday(userAccount)
+		}
 	}, [userAccount, locationDate])
 
 	useEffect(() => {
