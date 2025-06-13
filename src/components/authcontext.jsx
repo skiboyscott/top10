@@ -179,10 +179,10 @@ export const AuthProvider = ({ children }) => {
 				console.error('Exception in getSession:', err);
 			}
 		};
+		
+		getSession();
 
 		if (locationDate) {
-
-			getSession();
 			
 			const { data: listener } = supabase.auth.onAuthStateChange( (_event, session) => {
 				if (session?.user) {

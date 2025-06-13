@@ -244,7 +244,8 @@ const SignUp = (props) => {
     const [password, setPassword] = useState('')
     const navigate = useNavigate();
 
-    const handleSignUp = async () => {
+    const handleSignUp = async (e) => {
+        e.preventDefault(); 
         try {
             const { user } = await signUp(email, password, name);
             if (user) {
@@ -316,7 +317,7 @@ const SignUp = (props) => {
     };
 
     return(
-        <div>
+        <form onSubmit={handleSignUp}>
             <h3 style={{textAlign: 'center', marginBottom: '16px', color: '#2d3748'}}>Join the Community!</h3>
             <div style={style.inputGroup}>
                 <label style={style.label} for="signupName">Name</label>
@@ -330,11 +331,11 @@ const SignUp = (props) => {
                 <label style={style.label} for="signupPassword">Password</label>
                 <input style={style.input} type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Choose a password" required />
             </div>
-            <button style={style.authBtn} onClick={handleSignUp}>Create Account</button>
+            <button style={style.authBtn}>Create Account</button>
             <div style={style.authToggle}>
                 Already have an account? <button style={style.toggleButton} onClick={toggleView}> Sign in here</button>
             </div>
-        </div>
+        </form>
 
     )
 };
@@ -346,7 +347,8 @@ const SignIn = (props) => {
     const [password, setPassword] = useState('')
     const navigate = useNavigate();
 
-    const handleSignIn = async () => {
+    const handleSignIn = async (e) => {
+        e.preventDefault(); 
         try {
             const { user } = await signIn(email, password);
             if (user) {
@@ -416,7 +418,7 @@ const SignIn = (props) => {
     };
 
     return (
-        <div>
+        <form onSubmit={handleSignIn}>
             <h3 style={style.heading}>Welcome Back!</h3>
             <div style={style.inputGroup}>
                 <label style={style.label}>Email</label>
@@ -426,14 +428,14 @@ const SignIn = (props) => {
                 <label style={style.label}>Password</label>
                 <input style={style.input} type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Your password" required />
             </div>
-            <button style={style.authBtn} type="submit" onClick={handleSignIn}>Sign In</button>
+            <button style={style.authBtn} type="submit">Sign In</button>
             {/* <div style={style.authToggle}>
                 <button style={style.toggleButton} type="button" onClick={goToForgot}>Forgot Password?</button>
             </div> */}
             <div style={style.authToggle}>Don't have an account? {' '}
                 <button style={style.toggleButton} type="button" onClick={toggleView}>Create one here</button>
             </div>
-        </div>
+        </form>
     )
 };
 
