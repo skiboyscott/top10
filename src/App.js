@@ -31,7 +31,7 @@ function App() {
   const webIssues = false
 
   const style = {
-        maxWidth: "420px",
+        maxWidth: "375px",
         margin: "0 auto",
         background: "rgba(255, 255, 255, 0.96)",
         borderRadius: "24px",

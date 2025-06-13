@@ -26,7 +26,7 @@ const Header = () => {
     return (
         <div style={style.header}>
             <div style={style.logo}>🌤️</div>
-            <h1>Top 10 Weather Day {location ? ` in ${location}` : ''}</h1>
+            <h2>Top 10 Weather Day {location ? ` in ${location}` : ''}</h2>
             <p style={style.subtitle}>Weather crowdsourcing<br />Help us identify the most beautiful days!</p>
         </div>
     );
@@ -55,7 +55,8 @@ const UserWelcome = () => {
             borderRadius: "6px",
             fontSize: "14px",
             cursor: "pointer",
-            marginTop: "8px",
+            margin: "8px 0",
+            textDecoration: 'none'
         },
     };
 
@@ -77,9 +78,7 @@ const UserWelcome = () => {
                         Welcome!
                     </h3>
                     <p>Ready to vote on today's weather?</p>
-                    <button style={style.button}>
-                        <Link to={'/authentication'}>Sign In to Vote</Link>    
-                    </button>
+                    <Link to={'/authentication'} style={style.button}>Sign In to Vote</Link>
                 </div>
             }
         </div>
@@ -153,7 +152,7 @@ const WeatherCard = () => {
         detailValue: {
             fontSize: 18,
             fontWeight: 600,
-            },
+        },
     };
 
     return (
@@ -423,13 +422,13 @@ const VotingSection = () => {
     return(
         <div>
             <div style={style.questionSection}>
-                <h2>Is today a "Top 10" weather day?</h2>
+                <h3>Is today a "Top 10" weather day?</h3>
                 <p>Would you consider today's weather to be one of the 10 best days of the year{location ? ` in ${location}` : ''}?</p>
             </div>
             {loggedIn ?
                 votedTodayData.id ?
                     <div style={style.questionSection}>
-                        <h1>Would you like to change your vote? Is today a top 10 weather day?</h1>
+                        <h3>Would you like to change your vote? Is today a top 10 weather day?</h3>
                         <div style={style.voteButtons}>
                             {votedTodayData.is_top10 === false ? 
                                 <button

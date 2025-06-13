@@ -261,6 +261,8 @@ const SignUp = (props) => {
 
     const style = {
         inputGroup: {
+            display: 'flex',
+            flexDirection: 'column',
             marginBottom: '16px',
         },
         label: {
@@ -271,15 +273,12 @@ const SignUp = (props) => {
             marginBottom: '6px',
         },
         input: {
-            width: '100%',
             padding: '12px 16px',
             border: '2px solid #e2e8f0',
             borderRadius: '10px',
             fontSize: '16px',
             background: 'white',
             transition: 'border-color 0.2s',
-            // note: inline styles can’t do :focus styles,
-            // you’d have to handle focus styles via CSS or JS
         },
         authBtn: {
             width: '100%',
@@ -362,6 +361,8 @@ const SignIn = (props) => {
 
     const style = {
         inputGroup: {
+            display: 'flex',
+            flexDirection: 'column',
             marginBottom: '16px',
         },
         label: {
@@ -372,15 +373,12 @@ const SignIn = (props) => {
             marginBottom: '6px',
         },
         input: {
-            width: '100%',
             padding: '12px 16px',
             border: '2px solid #e2e8f0',
             borderRadius: '10px',
             fontSize: '16px',
             background: 'white',
             transition: 'border-color 0.2s',
-            // note: inline styles can’t do :focus styles,
-            // you’d have to handle focus styles via CSS or JS
         },
         authBtn: {
             width: '100%',
