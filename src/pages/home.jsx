@@ -1,5 +1,5 @@
 import { useContext, useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../components/authcontext";
 import { WeatherContext } from "../components/weathercontext";
 import { VoteContext } from "../components/votecontext";
@@ -34,6 +34,7 @@ const Header = () => {
 
 const UserWelcome = () => {
     const {loggedIn, userName, signOut} = useContext(AuthContext)
+    const navigate = useNavigate()
 
     const style = {
         container: {
@@ -68,9 +69,9 @@ const UserWelcome = () => {
                         Welcome back, {userName}! 👋
                     </h3>
                     <p>Ready to vote on today's weather?</p>
-                        <button style={style.button} onClick={signOut}>
-                            Logout
-                        </button>
+                    <button style={style.button} onClick={signOut}>
+                        Logout
+                    </button>
                 </div>
             :
                 <div> 
@@ -78,7 +79,7 @@ const UserWelcome = () => {
                         Welcome!
                     </h3>
                     <p>Ready to vote on today's weather?</p>
-                    <Link to={'/authentication'} style={style.button}>Sign In to Vote</Link>
+                    <button style={style.button} onClick={() => navigate('/authentication')}>Sign In to Vote</button>
                 </div>
             }
         </div>
