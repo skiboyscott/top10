@@ -156,6 +156,10 @@ export const AuthProvider = ({ children }) => {
 	};
 
 	useEffect(() => {
+		checkIfVotedToday(userAccount)
+	}, [userAccount])
+
+	useEffect(() => {
 		const getSession = async () => {
 			try {
 				const { data: { session }, error } = await supabase.auth.getSession();
@@ -168,7 +172,6 @@ export const AuthProvider = ({ children }) => {
 					setUserName(session.user.user_metadata?.name || session.user.email);
 					setLoggedIn(true);
 					setUserAccount(session.user);
-					await checkIfVotedToday(session.user);
 				} else {
 					setUserName(null);
 					setLoggedIn(false);
@@ -188,7 +191,6 @@ export const AuthProvider = ({ children }) => {
 					setUserName(session.user.user_metadata?.name || session.user.email);
 					setLoggedIn(true);
 					setUserAccount(session.user)
-					checkIfVotedToday(session.user);
 				} else {
 					setUserName(null);
 					setLoggedIn(false);
