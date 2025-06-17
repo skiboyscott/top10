@@ -11,39 +11,30 @@ export const ResetPassword = () => {
 
     useEffect(() => {
         const processResetLink = async () => {
-            const href = window.location.href;
+            const hash = window.location.hash.substring(1);
+			const params = new URLSearchParams(hash);
 
-            // Split on the second '#' which contains access_token
-            const parts = href.split('#');
-            if (parts.length < 3) {
-            console.error('Missing tokens in URL');
-            return;
-            }
-
-            const tokenString = parts[2]; // access_token=...&refresh_token=...
-            const params = new URLSearchParams(tokenString);
-
-            const access_token = params.get('access_token');
-            const refresh_token = params.get('refresh_token');
-
+			const access_token = params.get('access_token');
+			const refresh_token = params.get('refresh_token');
             if (access_token && refresh_token) {
-            const { error } = await supabase.auth.setSession({
-                access_token,
-                refresh_token,
-            });
+				const { error } = await supabase.auth.setSession({
+					access_token,
+					refresh_token,
+				});
 
-            if (error) {
-                console.error('Error setting session:', error.message);
-            } else {
-                console.log('Session set! Ready to reset password.');
-            }
-            } else {
-            console.error('Missing access_token or refresh_token');
-            }
-        };
+				if (error) {
+					console.error('Error setting session:', error.message);
+				} else {
+					console.log('Session set! User is authenticated');
+					// Now you can show a form to let user reset their password
+				}
+			} else {
+				console.error('Missing tokens in URL');
+			}
+		};
 
-        processResetLink();
-        }, []);
+		processResetLink();
+	}, []);
 
     const handleReset = async (event) => {
         event.preventDefault();
@@ -410,9 +401,9 @@ const SignIn = (props) => {
                 <input style={style.input} type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Your password" required />
             </div>
             <button style={style.authBtn} type="submit">Sign In</button>
-            <div style={style.authToggle}>
+            {/* <div style={style.authToggle}>
                 <button style={style.toggleButton} type="button" onClick={goToForgot}>Forgot Password?</button>
-            </div>
+            </div> */}
             <div style={style.authToggle}>Don't have an account? {' '}
                 <button style={style.toggleButton} type="button" onClick={toggleView}>Create one here</button>
             </div>
