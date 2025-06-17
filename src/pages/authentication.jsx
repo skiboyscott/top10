@@ -11,10 +11,20 @@ export const ResetPassword = () => {
 
     useEffect(() => {
         const processResetLink = async () => {
-            const hash = window.location.hash;
-            const tokenParamsString = hash.split('?')[1];
-            const params = new URLSearchParams(tokenParamsString);
+            // Full URL looks like: http://localhost:3000/#/reset-password#access_token=...
+            // HashRouter sees only "#/reset-password"
+            // So window.location.hash === "#/reset-password#access_token=..."
 
+            // Split the second part of the hash manually
+            const fullHash = window.location.hash; // "#/reset-password#access_token=..."
+            const tokenPart = fullHash.split('#')[2]; // get the second hash after "#/reset-password"
+            
+            if (!tokenPart) {
+                console.error('Token part missing from hash');
+                return;
+            }
+
+            const params = new URLSearchParams(tokenPart);
             const access_token = params.get('access_token');
             const refresh_token = params.get('refresh_token');
 
@@ -27,15 +37,16 @@ export const ResetPassword = () => {
                 if (error) {
                     console.error('Error setting session:', error.message);
                 } else {
-                    console.log('Session set! You can now reset the password.');
+                    console.log('Session set! Ready to reset password.');
                 }
             } else {
-                console.error('Missing tokens in URL');
+                console.error('Missing access_token or refresh_token');
             }
         };
 
         processResetLink();
     }, []);
+
 
 
     const handleReset = async (event) => {
