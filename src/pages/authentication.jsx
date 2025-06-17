@@ -11,30 +11,32 @@ export const ResetPassword = () => {
 
     useEffect(() => {
         const processResetLink = async () => {
-            const hash = window.location.hash.substring(1);
-			const params = new URLSearchParams(hash);
+            const hash = window.location.hash;
+            const tokenParamsString = hash.split('?')[1];
+            const params = new URLSearchParams(tokenParamsString);
 
-			const access_token = params.get('access_token');
-			const refresh_token = params.get('refresh_token');
+            const access_token = params.get('access_token');
+            const refresh_token = params.get('refresh_token');
+
             if (access_token && refresh_token) {
-				const { error } = await supabase.auth.setSession({
-					access_token,
-					refresh_token,
-				});
+                const { error } = await supabase.auth.setSession({
+                    access_token,
+                    refresh_token,
+                });
 
-				if (error) {
-					console.error('Error setting session:', error.message);
-				} else {
-					console.log('Session set! User is authenticated');
-					// Now you can show a form to let user reset their password
-				}
-			} else {
-				console.error('Missing tokens in URL');
-			}
-		};
+                if (error) {
+                    console.error('Error setting session:', error.message);
+                } else {
+                    console.log('Session set! You can now reset the password.');
+                }
+            } else {
+                console.error('Missing tokens in URL');
+            }
+        };
 
-		processResetLink();
-	}, []);
+        processResetLink();
+    }, []);
+
 
     const handleReset = async (event) => {
         event.preventDefault();
