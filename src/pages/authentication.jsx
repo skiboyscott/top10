@@ -11,40 +11,33 @@ export const ResetPassword = () => {
 
     useEffect(() => {
         const processResetLink = async () => {
-            const hash = window.location.hash;
-            const queryIndex = hash.indexOf('?');
-            if (queryIndex === -1) {
-                setError("Missing reset code in link.");
-                return;
-            }
+            const hash = window.location.hash.substring(1);
+			const params = new URLSearchParams(hash);
 
-            const queryString = hash.substring(queryIndex + 1);
-            const params = new URLSearchParams(queryString);
-            const code = params.get("code");
-            const type = params.get("type");
+			const access_token = params.get('access_token');
+			const refresh_token = params.get('refresh_token');
+            if (access_token && refresh_token) {
+				const { error } = await supabase.auth.setSession({
+					access_token,
+					refresh_token,
+				});
 
-            if (!code || type !== "recovery") {
-                setError("Invalid or expired reset link.");
-                return;
-            }
+				if (error) {
+					console.error('Error setting session:', error.message);
+				} else {
+					console.log('Session set! User is authenticated');
+					// Now you can show a form to let user reset their password
+				}
+			} else {
+				console.error('Missing tokens in URL');
+			}
+		};
 
-            const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+		processResetLink();
+	}, []);
 
-            if (error) {
-                console.error("Token exchange error:", error);
-                setError("Token exchange failed.");
-            } else if (!data?.session) {
-                console.error("No session returned.");
-                setError("Session missing after token exchange.");
-            } else {
-                console.log("✅ Session restored:", data.session);
-            }
-        };
-
-        processResetLink();
-    }, []);
-
-    const handleReset = async () => {
+    const handleReset = async (event) => {
+        event.preventDefault();
         if (!password) {
             setError('Please enter a new password');
             return;
@@ -67,11 +60,14 @@ export const ResetPassword = () => {
     };
 
     const style = {
-        title: { textAlign: 'center',
+        title: {
+            textAlign: 'center',
             marginBottom: '16px',
             color: '#2d3748'
         },
         inputGroup: {
+            display: 'flex',
+            flexDirection: 'column',
             marginBottom: '16px',
         },
         label: {
@@ -82,7 +78,6 @@ export const ResetPassword = () => {
             marginBottom: '6px',
         },
         input: {
-            width: '100%',
             padding: '12px 16px',
             border: '2px solid #e2e8f0',
             borderRadius: '10px',
@@ -110,27 +105,16 @@ export const ResetPassword = () => {
     };
 
     return (
-        <div>
-            <h3 style={style.title}>
-                Choose a New Password
-            </h3>
+        <form onSubmit={handleReset}>
+            <h3 style={style.title}>Choose a New Password</h3>
             <div style={style.inputGroup}>
                 <label style={style.label}>New Password</label>
-                <input
-                    style={style.input}
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your new password"
-                    required
-                />
+                <input style={style.input} type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter your new password" required />
             </div>
-            <button style={style.authBtn} onClick={handleReset}>
-                Update Password
-            </button>
+            <button style={style.authBtn} type='submit'>Update Password</button>
             {message && <p style={style.message}>{message}</p>}
             {error && <p style={style.error}>{error}</p>}
-        </div>
+        </form>
     );
 };
 
@@ -159,6 +143,8 @@ const ForgotPassword = (props) => {
             color: '#2d3748'
         },
         inputGroup: {
+            display: 'flex',
+            flexDirection: 'column',
             marginBottom: '16px',
         },
         label: {
@@ -169,7 +155,6 @@ const ForgotPassword = (props) => {
             marginBottom: '6px',
         },
         input: {
-            width: '100%',
             padding: '12px 16px',
             border: '2px solid #e2e8f0',
             borderRadius: '10px',
@@ -208,29 +193,16 @@ const ForgotPassword = (props) => {
 
     return (
         <div>
-            <h3 style={style.title}>
-                Forgot your password?
-            </h3>
+            <h3 style={style.title}>Forgot your password?</h3>
             <div style={style.inputGroup}>
                 <label style={style.label}>Email</label>
-                <input
-                    style={style.input}
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="your@email.com"
-                    required
-                />
+                <input style={style.input} type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="your@email.com" required />
             </div>
-            <button style={style.authBtn} onClick={handleReset}>
-                Send Reset Email
-            </button>
+            <button style={style.authBtn} onClick={handleReset}>Send Reset Email</button>
             {message && <p style={style.message}>{message}</p>}
             {error && <p style={style.error}>{error}</p>}
             <div style={{ textAlign: 'center' }}>
-                <button style={style.toggleButton} onClick={toggleView}>
-                    Back to Sign In
-                </button>
+                <button style={style.toggleButton} onClick={toggleView}>Back to Sign In</button>
             </div>
         </div>
     );
@@ -429,9 +401,9 @@ const SignIn = (props) => {
                 <input style={style.input} type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Your password" required />
             </div>
             <button style={style.authBtn} type="submit">Sign In</button>
-            {/* <div style={style.authToggle}>
+            <div style={style.authToggle}>
                 <button style={style.toggleButton} type="button" onClick={goToForgot}>Forgot Password?</button>
-            </div> */}
+            </div>
             <div style={style.authToggle}>Don't have an account? {' '}
                 <button style={style.toggleButton} type="button" onClick={toggleView}>Create one here</button>
             </div>

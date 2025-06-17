@@ -319,7 +319,7 @@ const ManualInput = () => {
 };
 
 const VotingSection = () => {
-    const {votedTodayData, submitVote, changeVote} = useContext(AuthContext)
+    const {votedTodayData, submitVote, changeVote, userName} = useContext(AuthContext)
     const {location, weatherData} = useContext(WeatherContext)
 
     const vote = (top10) => {
@@ -424,46 +424,49 @@ const VotingSection = () => {
         <div>
             <div style={style.questionSection}>
                 <h3>Is today a "Top 10" weather day?</h3>
-                <p>Would you consider today's weather to be one of the 10 best days of the year{location ? ` in ${location}` : ''}?</p>
+                <p>Would you consider today's weather to be one of the 10 best days of the year in {location}?</p>
             </div>
-            {votedTodayData.id ?
-                <div style={style.questionSection}>
-                    <h3>Would you like to change your vote? Is today a top 10 weather day?</h3>
-                    <div style={style.voteButtons}>
-                        {votedTodayData.is_top10 === false ? 
-                            <button
-                            style={{ ...style.voteBtn, ...style.yesBtn }}
-                            onClick={() => {
-                                if (window.confirm("Are you sure you want to change your vote?")) {
-                                    switchVote(true);
-                                }
-                            }}
-                            >
-                                👍 Yes!
-                            </button>
-                        :
-                            <button
-                            style={{ ...style.voteBtn, ...style.noBtn }}
-                            onClick={() => {
-                                if (window.confirm("Are you sure you want to change your vote?")) {
-                                    switchVote(false);
-                                }
-                            }}
-                            >
-                                👎 Not quite
-                            </button>
-                        }
+            {userName ?
+                votedTodayData.id ?
+                    <div style={style.questionSection}>
+                        <h3>Would you like to change your vote? Is today a top 10 weather day?</h3>
+                        <div style={style.voteButtons}>
+                            {votedTodayData.is_top10 === false ? 
+                                <button
+                                style={{ ...style.voteBtn, ...style.yesBtn }}
+                                onClick={() => {
+                                    if (window.confirm("Are you sure you want to change your vote?")) {
+                                        switchVote(true);
+                                    }
+                                }}
+                                >
+                                    👍 Yes!
+                                </button>
+                            :
+                                <button
+                                style={{ ...style.voteBtn, ...style.noBtn }}
+                                onClick={() => {
+                                    if (window.confirm("Are you sure you want to change your vote?")) {
+                                        switchVote(false);
+                                    }
+                                }}
+                                >
+                                    👎 Not quite
+                                </button>
+                            }
+                        </div>
                     </div>
-                </div>
+                :
+                    <div style={style.voteButtons}>
+                        <button style={{...style.voteBtn, ...style.yesBtn}} onClick={() => vote(true)}>
+                            👍 Yes!
+                        </button>
+                        <button style={{...style.voteBtn, ...style.noBtn}} onClick={() => vote(false)}>
+                            👎 Not quite
+                        </button>
+                    </div>
             :
-                <div style={style.voteButtons}>
-                    <button style={{...style.voteBtn, ...style.yesBtn}} onClick={() => vote(true)}>
-                        👍 Yes!
-                    </button>
-                    <button style={{...style.voteBtn, ...style.noBtn}} onClick={() => vote(false)}>
-                        👎 Not quite
-                    </button>
-                </div>
+                null
             }
             <div style={style.feedback}>
                 <h3>Thank you!</h3>
