@@ -11,43 +11,39 @@ export const ResetPassword = () => {
 
     useEffect(() => {
         const processResetLink = async () => {
-            // Full URL looks like: http://localhost:3000/#/reset-password#access_token=...
-            // HashRouter sees only "#/reset-password"
-            // So window.location.hash === "#/reset-password#access_token=..."
+            const href = window.location.href;
 
-            // Split the second part of the hash manually
-            const fullHash = window.location.hash; // "#/reset-password#access_token=..."
-            const tokenPart = fullHash.split('#')[2]; // get the second hash after "#/reset-password"
-            
-            if (!tokenPart) {
-                console.error('Token part missing from hash');
-                return;
+            // Split on the second '#' which contains access_token
+            const parts = href.split('#');
+            if (parts.length < 3) {
+            console.error('Missing tokens in URL');
+            return;
             }
 
-            const params = new URLSearchParams(tokenPart);
+            const tokenString = parts[2]; // access_token=...&refresh_token=...
+            const params = new URLSearchParams(tokenString);
+
             const access_token = params.get('access_token');
             const refresh_token = params.get('refresh_token');
 
             if (access_token && refresh_token) {
-                const { error } = await supabase.auth.setSession({
-                    access_token,
-                    refresh_token,
-                });
+            const { error } = await supabase.auth.setSession({
+                access_token,
+                refresh_token,
+            });
 
-                if (error) {
-                    console.error('Error setting session:', error.message);
-                } else {
-                    console.log('Session set! Ready to reset password.');
-                }
+            if (error) {
+                console.error('Error setting session:', error.message);
             } else {
-                console.error('Missing access_token or refresh_token');
+                console.log('Session set! Ready to reset password.');
+            }
+            } else {
+            console.error('Missing access_token or refresh_token');
             }
         };
 
         processResetLink();
-    }, []);
-
-
+        }, []);
 
     const handleReset = async (event) => {
         event.preventDefault();
