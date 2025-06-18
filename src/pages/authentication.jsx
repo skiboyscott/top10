@@ -401,9 +401,9 @@ const SignIn = (props) => {
                 <input style={style.input} type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Your password" required />
             </div>
             <button style={style.authBtn} type="submit">Sign In</button>
-            {/* <div style={style.authToggle}>
+            <div style={style.authToggle}>
                 <button style={style.toggleButton} type="button" onClick={goToForgot}>Forgot Password?</button>
-            </div> */}
+            </div>
             <div style={style.authToggle}>Don't have an account? {' '}
                 <button style={style.toggleButton} type="button" onClick={toggleView}>Create one here</button>
             </div>
