@@ -405,8 +405,8 @@ const SignIn = (props) => {
             <div style={style.authToggle}>
                 <button style={style.toggleButton} type="button" onClick={goToForgot}>Forgot Password?</button>
             </div>
-            <div style={style.authToggle}>Don't have an account? {' '}
-                <button style={style.toggleButton} type="button" onClick={toggleView}>Create one here</button>
+            <div style={style.authToggle}>
+                <button style={style.toggleButton} type="button" onClick={toggleView}>Create Account</button>
             </div>
         </form>
     )
