@@ -133,6 +133,7 @@ const ForgotPassword = (props) => {
         } else {
             setMessage('Password reset email sent! Check your inbox.');
             setError('');
+            setEmail('')
         }
     };
 
