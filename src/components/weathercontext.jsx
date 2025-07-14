@@ -4,7 +4,7 @@ import tzLookup from 'tz-lookup';
 import { DateTime } from 'luxon';
 
 export const WeatherContext = createContext();
-const weatherApiKey = import.meta.env.VITE_WEATHER_APP_API;
+const weatherApiKey = process.meta.env.REACT_APP_WEATHER_APP_API;
 
 export const WeatherProvider = ({ children }) => {
     const [weatherData, setWeatherData] = useState({})
