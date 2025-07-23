@@ -1,9 +1,9 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Home } from './pages/home';
-import { Authentication, ResetPassword } from './pages/authentication';
 import { AuthProvider } from './components/authcontext';
 import { WeatherProvider } from './components/weathercontext';
 import { VoteProvider } from './components/votecontext';
+import { ForgotPassword, SignIn, SignUp, ResetPassword } from './pages/authentication';
 
 const WebsiteIssues = () => {
 
@@ -30,33 +30,23 @@ const WebsiteIssues = () => {
 function App() {
   const webIssues = false
 
-  const style = {
-        maxWidth: "375px",
-        margin: "0 auto",
-        background: "rgba(255, 255, 255, 0.96)",
-        borderRadius: "24px",
-        padding: "24px",
-        boxShadow: "0 25px 50px rgba(0, 0, 0, 0.15)",
-        backdropFilter: "blur(20px)",
-  }
-
   return (
-    <div style={style}>
-      <AuthProvider>
-        <WeatherProvider>
-          <VoteProvider>
-            <BrowserRouter basename="/">
-              {webIssues && <WebsiteIssues />}
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/authentication" element={<Authentication />} />
-                <Route path="/reset-password" element={<ResetPassword />} />
-              </Routes>
-            </BrowserRouter>
-          </VoteProvider>
-        </WeatherProvider>
-      </AuthProvider>
-    </div>
+    <AuthProvider>
+      <WeatherProvider>
+        <VoteProvider>
+          <BrowserRouter basename="/">
+            {webIssues && <WebsiteIssues />}
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/sign-in" element={<SignIn />} />
+              <Route path="/sign-up" element={<SignUp />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+            </Routes>
+          </BrowserRouter>
+        </VoteProvider>
+      </WeatherProvider>
+    </AuthProvider>
   );
 }
 

@@ -79,7 +79,7 @@ const UserWelcome = () => {
                         Welcome!
                     </h3>
                     <p>Ready to vote on today's weather?</p>
-                    <button style={style.button} onClick={() => navigate('/authentication')}>Sign In to Vote</button>
+                    <button style={style.button} onClick={() => navigate('/sign-in')}>Sign In to Vote</button>
                 </div>
             }
         </div>
@@ -563,8 +563,18 @@ const StatSection = () => {
 export const Home = () => {
     const {location} = useContext(WeatherContext)
 
+    const style = {
+        maxWidth: "375px",
+        margin: "0 auto",
+        background: "rgba(255, 255, 255, 0.96)",
+        borderRadius: "24px",
+        padding: "24px",
+        boxShadow: "0 25px 50px rgba(0, 0, 0, 0.15)",
+        backdropFilter: "blur(20px)",
+    }
+
     return(
-        <div>
+        <div style={style}>
             <Header />
             <UserWelcome />
             <WeatherCard />

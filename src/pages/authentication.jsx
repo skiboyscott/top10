@@ -2,6 +2,79 @@ import { useContext, useEffect, useState } from "react"
 import { AuthContext } from "../components/authcontext";
 import { useNavigate } from "react-router-dom";
 import supabase from "../utils/supabaseClient";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
+
+const containerStyle = `bg-white rounded-2xl p-5 border border-gray-200/50 min-w-[400px] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.45)]`
+const pageStyle = "flex min-h-screen flex-col justify-start items-center sm:pt-2 md:pt-24"
+
+const Title = (props) => {
+    const {text} = props
+
+    return(
+        <h3 className="text-center text-2xl font-semibold text-gray-800 mb-4">{text}</h3>
+    )
+}
+
+const LabeledInput = (props) => {
+    const {label, type, value, onChange, placeholder, required} = props
+    const [showPassword, setShowPassword] = useState(false);
+    const isPassword = type === "password";
+    const actualType = isPassword && showPassword ? "text" : type;
+
+    return(
+        <div className="flex flex-col mb-4">
+            <label className="text-lg font-medium text-gray-600 mb-3">{label}</label>
+            {isPassword ? (
+                <div className="relative">
+                    <input type={actualType} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} required={required} className="px-4 py-3 border-2 border-gray-300 rounded-lg text-base bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 w-full pr-12" />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className=" absolute inset-y-0 right-0 p-3 pr-4 flex items-center text-gray-500">
+                        <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
+                    </button>
+                </div>
+            ) : (
+                <input type={type} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} required={required} className="px-4 py-3 border-2 border-gray-300 rounded-lg text-base bg-white focus:outline-none focus:ring-2 focus:ring-blue-400" />
+            )}
+        </div>
+    )
+}
+
+const Button = (props) => {
+    const {text} = props
+
+    return(
+        <button type={'submit'} className="w-full bg-gradient-to-r from-blue-400 to-blue-600 text-white py-3 rounded-lg text-base font-semibold hover:opacity-90 transition my-4">
+            {text}
+        </button>
+    )
+}
+
+const AuthToggle = (props) => {
+    const {text, link, buttonText} = props
+    const navigate = useNavigate();
+
+    return(
+        <div class="text-center text-gray-600 text-sm m-1">
+            {text && text} <button type="button" class="text-blue-400 font-semibold underline cursor-pointer text-sm p-0 bg-transparent border-none" onClick={() => navigate(link)}> {buttonText}</button>
+        </div>
+    )
+}
+
+const Message = (props) => {
+    const {message} = props
+
+    return(
+        message && <p className="text-green-600 text-sm text-center">{message}</p>
+    )
+}
+
+const Error = (props) => {
+    const {error} = props
+
+    return(
+        error && <p className="text-green-600 text-sm text-center">{error}</p>
+    )
+}
 
 export const ResetPassword = () => {
     const [password, setPassword] = useState('');
@@ -12,29 +85,27 @@ export const ResetPassword = () => {
     useEffect(() => {
         const processResetLink = async () => {
             const hash = window.location.hash.substring(1);
-			const params = new URLSearchParams(hash);
+            const params = new URLSearchParams(hash);
 
-			const access_token = params.get('access_token');
-			const refresh_token = params.get('refresh_token');
+            const access_token = params.get('access_token');
+            const refresh_token = params.get('refresh_token');
+
             if (access_token && refresh_token) {
-				const { error } = await supabase.auth.setSession({
-					access_token,
-					refresh_token,
-				});
+                const { error } = await supabase.auth.setSession({
+                    access_token,
+                    refresh_token,
+                });
 
-				if (error) {
-					console.error('Error setting session:', error.message);
-				} else {
-					console.log('Session set! User is authenticated');
-					// Now you can show a form to let user reset their password
-				}
-			} else {
-				console.error('Missing tokens in URL');
-			}
-		};
+                if (error) {
+                    console.error('Error setting session:', error.message);
+                }
+            } else {
+                console.error('Missing tokens in URL');
+            }
+        };
 
-		processResetLink();
-	}, []);
+        processResetLink();
+    }, []);
 
     const handleReset = async (event) => {
         event.preventDefault();
@@ -43,10 +114,9 @@ export const ResetPassword = () => {
             return;
         }
 
-        const { error } = await supabase.auth.updateUser({ password: password });
+        const { error } = await supabase.auth.updateUser({ password });
 
         if (error) {
-            console.log(error)
             setError(error.message);
             setMessage('');
         } else {
@@ -54,78 +124,34 @@ export const ResetPassword = () => {
             setError('');
             setPassword('');
             setTimeout(() => {
-                navigate('/authentication');
+                navigate('/sign-in');
             }, 3000);
         }
     };
 
-    const style = {
-        title: {
-            textAlign: 'center',
-            marginBottom: '16px',
-            color: '#2d3748'
-        },
-        inputGroup: {
-            display: 'flex',
-            flexDirection: 'column',
-            marginBottom: '16px',
-        },
-        label: {
-            display: 'block',
-            color: '#4a5568',
-            fontSize: '14px',
-            fontWeight: 600,
-            marginBottom: '6px',
-        },
-        input: {
-            padding: '12px 16px',
-            border: '2px solid #e2e8f0',
-            borderRadius: '10px',
-            fontSize: '16px',
-            background: 'white',
-        },
-        authBtn: {
-            width: '100%',
-            background: 'linear-gradient(135deg, #4299e1 0%, #3182ce 100%)',
-            color: 'white',
-            border: 'none',
-            padding: '14px',
-            borderRadius: '12px',
-            fontSize: '16px',
-            fontWeight: 600,
-            cursor: 'pointer',
-            marginBottom: '12px',
-        },
-        message: {
-            color: 'green',
-        },
-        error: {
-            color: 'red',
-        },
-    };
-
     return (
-        <form onSubmit={handleReset}>
-            <h3 style={style.title}>Choose a New Password</h3>
-            <div style={style.inputGroup}>
-                <label style={style.label}>New Password</label>
-                <input style={style.input} type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Enter your new password" required />
+        <div class={pageStyle}>
+            <div className={containerStyle}>
+                <form onSubmit={handleReset}>
+                    <Title text={'Choose a New Password'} />
+                    <LabeledInput label={'New Password'} type={'password'} value={password} onChange={setPassword} placeholder={'Enter your new password'} required={true} />
+                    <Button text={'Update Password'} />
+                    <Message message={message} />
+                    <Error error={error} />
+                </form>
             </div>
-            <button style={style.authBtn} type='submit'>Update Password</button>
-            {message && <p style={style.message}>{message}</p>}
-            {error && <p style={style.error}>{error}</p>}
-        </form>
+        </div>
     );
 };
 
-const ForgotPassword = (props) => {
-    const {toggleView} = props
+export const ForgotPassword = () => {
     const [email, setEmail] = useState('');
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
     const {resetPassword} = useContext(AuthContext)
 
-    const handleReset = async () => {
+    const handleReset = async (e) => {
+        e.preventDefault(); 
         const error  = await resetPassword(email)
         if (error) {
             setError(error.message);
@@ -137,84 +163,28 @@ const ForgotPassword = (props) => {
         }
     };
 
-    const style = {
-        title: {
-            textAlign: 'center',
-            marginBottom: '16px',
-            color: '#2d3748'
-        },
-        inputGroup: {
-            display: 'flex',
-            flexDirection: 'column',
-            marginBottom: '16px',
-        },
-        label: {
-            display: 'block',
-            color: '#4a5568',
-            fontSize: '14px',
-            fontWeight: 600,
-            marginBottom: '6px',
-        },
-        input: {
-            padding: '12px 16px',
-            border: '2px solid #e2e8f0',
-            borderRadius: '10px',
-            fontSize: '16px',
-            background: 'white',
-        },
-        authBtn: {
-            width: '100%',
-            background: 'linear-gradient(135deg, #4299e1 0%, #3182ce 100%)',
-            color: 'white',
-            border: 'none',
-            padding: '14px',
-            borderRadius: '12px',
-            fontSize: '16px',
-            fontWeight: 600,
-            cursor: 'pointer',
-            marginBottom: '12px',
-        },
-        toggleButton: {
-            background: 'none',
-            border: 'none',
-            color: '#4299e1',
-            fontWeight: 600,
-            cursor: 'pointer',
-            textDecoration: 'underline',
-            padding: 0,
-            fontSize: '14px',
-        },
-        message: {
-            color: 'green',
-        },
-        error: {
-            color: 'red',
-        },
-    };
-
     return (
-        <div>
-            <h3 style={style.title}>Forgot your password?</h3>
-            <div style={style.inputGroup}>
-                <label style={style.label}>Email</label>
-                <input style={style.input} type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="your@email.com" required />
-            </div>
-            <button style={style.authBtn} onClick={handleReset}>Send Reset Email</button>
-            {message && <p style={style.message}>{message}</p>}
-            {error && <p style={style.error}>{error}</p>}
-            <div style={{ textAlign: 'center' }}>
-                <button style={style.toggleButton} onClick={toggleView}>Back to Sign In</button>
+        <div class={pageStyle}>
+            <div className={containerStyle}>
+                <form onSubmit={handleReset}>
+                    <Title text={'Forgot your password?'} />
+                    <LabeledInput label={'Email'} type={"email"} value={email} onChange={setEmail} placeholder={"your@email.com"} required />
+                    <Button text={'Send Reset Email'} />
+                    <Message message={message} />
+                    <Error error={error} />
+                    <AuthToggle link={'/sign-in'} buttonText={'Back to Sign In'} />
+                </form>
             </div>
         </div>
     );
 };
 
-const SignUp = (props) => {
-    const {toggleView} = props
+export const SignUp = () => {
     const { signUp } = useContext(AuthContext);
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
+    /* const [role, setRole] = useState(''); */
     const navigate = useNavigate();
 
     const handleSignUp = async (e) => {
@@ -226,95 +196,46 @@ const SignUp = (props) => {
                 alert("Signed up successfully! Check your email for a verification email to confirm sign up!");
             }
         } catch (error) {
-            setEmail('')
+            console.log(error)
+            /* setEmail('')
             setName('')
-            setPassword('')
+            setPassword('') 
+            setRole('')*/
             alert('Error trying to sign up, please try again later.');
         }
     };
 
-    const style = {
-        inputGroup: {
-            display: 'flex',
-            flexDirection: 'column',
-            marginBottom: '16px',
-        },
-        label: {
-            display: 'block',
-            color: '#4a5568',
-            fontSize: '14px',
-            fontWeight: 600,
-            marginBottom: '6px',
-        },
-        input: {
-            padding: '12px 16px',
-            border: '2px solid #e2e8f0',
-            borderRadius: '10px',
-            fontSize: '16px',
-            background: 'white',
-            transition: 'border-color 0.2s',
-        },
-        authBtn: {
-            width: '100%',
-            background: 'linear-gradient(135deg, #4299e1 0%, #3182ce 100%)',
-            color: 'white',
-            border: 'none',
-            padding: '14px',
-            borderRadius: '12px',
-            fontSize: '16px',
-            fontWeight: 600,
-            cursor: 'pointer',
-            transition: 'all 0.3s ease',
-            marginBottom: '12px',
-        },
-        authToggle: {
-            textAlign: 'center',
-            color: '#4a5568',
-            fontSize: '14px',
-        },
-        toggleButton: {
-            background: 'none',
-            border: 'none',
-            color: '#4299e1',
-            fontWeight: 600,
-            cursor: 'pointer',
-            textDecoration: 'underline',
-            padding: 0,
-            fontSize: '14px',
-        },
-        heading: {
-            textAlign: 'center',
-            marginBottom: '16px',
-            color: '#2d3748',
-        },
-    };
-
     return(
-        <form onSubmit={handleSignUp}>
-            <h3 style={{textAlign: 'center', marginBottom: '16px', color: '#2d3748'}}>Join the Community!</h3>
-            <div style={style.inputGroup}>
-                <label style={style.label} for="signupName">Name</label>
-                <input style={style.input} type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" required />
+        <div class={pageStyle}>
+            <div className={containerStyle}>
+                <form onSubmit={handleSignUp}>
+                    <Title text={'Sign Up!'} />
+                    <LabeledInput label={'Name'} type={"text"} value={name} onChange={setName} placeholder={"Your Name"} required={true} />
+                    <LabeledInput label={'Email'} type={"email"} value={email} onChange={setEmail} placeholder={"your@email.com"} required={true} />
+                    <LabeledInput label={'Password'} type={"password"} value={password} onChange={setPassword} placeholder={"Your password"} required={true} />
+                    <Button text={'Create Account'} />
+                    {/* <div style={style.inputGroup}>
+                        <label style={style.label} htmlFor="signupRole">Role</label>
+                        <select
+                        style={style.input}
+                        value={role}
+                        onChange={(e) => setRole(e.target.value)}
+                        required
+                        >
+                        <option value="">Select a role</option>
+                        <option value="doctor">Doctor</option>
+                        <option value="patient">Patient</option>
+                        </select>
+                        </div> */}
+                    <AuthToggle text={'Already have an account?'} link={'/sign-in'} buttonText={'Sign in here'} />
+                </form>
             </div>
-            <div style={style.inputGroup}>
-                <label style={style.label} for="signupEmail">Email</label>
-                <input style={style.input} type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="your@email.com" required />
-            </div>
-            <div style={style.inputGroup}>
-                <label style={style.label} for="signupPassword">Password</label>
-                <input style={style.input} type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Choose a password" required />
-            </div>
-            <button style={style.authBtn}>Create Account</button>
-            <div style={style.authToggle}>
-                Already have an account? <button style={style.toggleButton} onClick={toggleView}> Sign in here</button>
-            </div>
-        </form>
+        </div>
 
     )
 };
 
-const SignIn = (props) => {
-    const {toggleView, goToForgot} = props
+export const SignIn = () => {
     const { signIn } = useContext(AuthContext);
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -334,102 +255,20 @@ const SignIn = (props) => {
         }
     }
 
-    const style = {
-        inputGroup: {
-            display: 'flex',
-            flexDirection: 'column',
-            marginBottom: '16px',
-        },
-        label: {
-            display: 'block',
-            color: '#4a5568',
-            fontSize: '14px',
-            fontWeight: 600,
-            marginBottom: '6px',
-        },
-        input: {
-            padding: '12px 16px',
-            border: '2px solid #e2e8f0',
-            borderRadius: '10px',
-            fontSize: '16px',
-            background: 'white',
-            transition: 'border-color 0.2s',
-        },
-        authBtn: {
-            width: '100%',
-            background: 'linear-gradient(135deg, #4299e1 0%, #3182ce 100%)',
-            color: 'white',
-            border: 'none',
-            padding: '14px',
-            borderRadius: '12px',
-            fontSize: '16px',
-            fontWeight: 600,
-            cursor: 'pointer',
-            transition: 'all 0.3s ease',
-            marginBottom: '12px',
-        },
-        authToggle: {
-            textAlign: 'center',
-            color: '#4a5568',
-            fontSize: '14px',
-        },
-        toggleButton: {
-            background: 'none',
-            border: 'none',
-            color: '#4299e1',
-            fontWeight: 600,
-            cursor: 'pointer',
-            textDecoration: 'underline',
-            padding: 0,
-            fontSize: '14px',
-        },
-        heading: {
-            textAlign: 'center',
-            marginBottom: '16px',
-            color: '#2d3748',
-        },
-    };
-
     return (
-        <form onSubmit={handleSignIn}>
-            <h3 style={style.heading}>Welcome Back!</h3>
-            <div style={style.inputGroup}>
-                <label style={style.label}>Email</label>
-                <input style={style.input} type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="your@email.com" required/>
+        <div class={pageStyle}>
+            <div className={containerStyle}>
+                <form onSubmit={handleSignIn}>
+                    <Title text={'Welcome Back!'} />
+                    <LabeledInput label={'Email'} type={"email"} value={email} onChange={setEmail} placeholder={"your@email.com"} required={true} />
+                    <LabeledInput label={'Password'} type={"password"} value={password} onChange={setPassword} placeholder={"Your password"} required={true} />
+                    <Button text={'Sign In'} />
+                    <AuthToggle link={'/forgot-password'} buttonText={'Forgot Password?'} />
+                    <AuthToggle text={'No account?'} link={'/sign-up'} buttonText={'Create one here'} />
+                </form>
             </div>
-            <div style={style.inputGroup}>
-                <label style={style.label}>Password</label>
-                <input style={style.input} type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Your password" required />
-            </div>
-            <button style={style.authBtn} type="submit">Sign In</button>
-            <div style={style.authToggle}>
-                <button style={style.toggleButton} type="button" onClick={goToForgot}>Forgot Password?</button>
-            </div>
-            <div style={style.authToggle}>No account? {' '}
-                <button style={style.toggleButton} type="button" onClick={toggleView}>Create one here</button>
-            </div>
-        </form>
-    )
-};
-
-export const Authentication = () => {
-    const [authView, setAuthView] = useState('signIn'); 
-
-    const style = {
-        authSection: {
-            background: 'linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%)',
-            borderRadius: '16px',
-            padding: '20px',
-            border: '1px solid rgba(226, 232, 240, 0.5)',
-        },
-    }
-
-    return(
-        <div style={style.authSection}>
-            {authView === 'signIn' && <SignIn toggleView={() => setAuthView('signUp')} goToForgot={() => setAuthView('forgot')} />}
-            {authView === 'signUp' && <SignUp toggleView={() => setAuthView('signIn')} />}
-            {authView === 'forgot' && <ForgotPassword toggleView={() => setAuthView('signIn')} />}
         </div>
-        
     )
 };
+
+

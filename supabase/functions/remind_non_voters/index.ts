@@ -5,10 +5,7 @@ const brevoKey = Deno.env.get('BREVO_API_KEY')!;
 const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 // Serve the edge function
-const supabase = createClient(
-  supabaseUrl,
-  serviceRoleKey
-)
+const supabase = createClient(supabaseUrl,serviceRoleKey)
 
 serve(async () => {
   const today = new Date().toISOString().split('T')[0]
