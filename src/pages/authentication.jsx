@@ -5,8 +5,8 @@ import supabase from "../utils/supabaseClient";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 
-const containerStyle = `bg-white rounded-2xl p-5 border border-gray-200/50 sm:min-w-[350px] md:min-w-[400px] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.45)]`
-const pageStyle = "flex min-h-screen flex-col justify-start items-center sm:pt-2 md:pt-24"
+const containerStyle = `sm:min-w-[350px] md:min-w-[400px] sm:items-center bg-white rounded-2xl p-5 border border-gray-200/50 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.45)]`
+const pageStyle = "flex min-h-screen flex-col justify-start items-center sm:pt-0 md:pt-24"
 
 const Title = (props) => {
     const {text} = props
